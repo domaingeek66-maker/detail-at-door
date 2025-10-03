@@ -84,6 +84,12 @@ export default function AdminSettings() {
       service_area_lng: "Startlocatie Lengtegraad",
       service_area_radius_km: "Servicegebied Radius (km)",
       travel_cost_per_km: "Reiskosten per km (€)",
+      company_name: "Bedrijfsnaam",
+      company_address: "Bedrijfsadres",
+      company_postal_city: "Postcode en Plaats",
+      company_vat_number: "BTW-nummer",
+      company_email: "E-mailadres",
+      company_phone: "Telefoonnummer",
     };
     return labels[key] || key;
   };
@@ -99,11 +105,15 @@ export default function AdminSettings() {
     if (key.startsWith('service_area') || key.startsWith('travel_cost')) {
       return 'servicegebied';
     }
+    if (key.startsWith('company_')) {
+      return 'bedrijf';
+    }
     return 'api';
   };
 
   const apiSettings = settings.filter(s => getSettingCategory(s.key) === 'api');
   const serviceAreaSettings = settings.filter(s => getSettingCategory(s.key) === 'servicegebied');
+  const companySettings = settings.filter(s => getSettingCategory(s.key) === 'bedrijf');
 
   if (loading) {
     return <div>Laden...</div>;
@@ -111,6 +121,40 @@ export default function AdminSettings() {
 
   return (
     <div className="space-y-6">
+      {/* Bedrijfsinformatie */}
+      <div>
+        <div className="mb-6">
+          <h2 className="text-2xl sm:text-3xl font-bold">Bedrijfsinformatie</h2>
+          <p className="text-sm sm:text-base text-muted-foreground mt-2">
+            Deze informatie verschijnt op facturen
+          </p>
+        </div>
+
+        <div className="bg-card border border-border rounded-xl p-4 sm:p-6 space-y-6">
+          <div className="space-y-4">
+            {companySettings.map((setting) => (
+              <div key={setting.key} className="space-y-2">
+                <Label htmlFor={setting.key}>
+                  {getSettingLabel(setting.key)}
+                </Label>
+                {setting.description && (
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    {setting.description}
+                  </p>
+                )}
+                <Input
+                  id={setting.key}
+                  type={getSettingType(setting.key)}
+                  value={setting.value || ""}
+                  onChange={(e) => handleValueChange(setting.key, e.target.value)}
+                  placeholder={`Voer ${getSettingLabel(setting.key)} in`}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Servicegebied Instellingen */}
       <div>
         <div className="mb-6">

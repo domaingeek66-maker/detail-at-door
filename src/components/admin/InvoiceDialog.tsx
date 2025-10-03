@@ -40,10 +40,19 @@ interface InvoiceDialogProps {
 export function InvoiceDialog({ open, onOpenChange, appointment }: InvoiceDialogProps) {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const [companyInfo, setCompanyInfo] = useState({
+    name: "Car Detail Exclusief",
+    address: "Adres bedrijf",
+    postalCity: "Postcode, Stad",
+    vatNumber: "BE0123456789",
+    email: "info@cardetail.be",
+    phone: "+32 123 45 67 89",
+  });
 
   useEffect(() => {
     if (open && appointment.service_ids?.length > 0) {
       fetchServices();
+      fetchCompanyInfo();
     }
   }, [open, appointment.service_ids]);
 
@@ -57,6 +66,30 @@ export function InvoiceDialog({ open, onOpenChange, appointment }: InvoiceDialog
       setServices(data);
     }
     setLoading(false);
+  };
+
+  const fetchCompanyInfo = async () => {
+    const { data, error } = await supabase
+      .from("settings")
+      .select("key, value")
+      .in("key", [
+        "company_name",
+        "company_address",
+        "company_postal_city",
+        "company_vat_number",
+        "company_email",
+        "company_phone",
+      ]);
+
+    if (!error && data) {
+      const info: any = {};
+      data.forEach((setting) => {
+        const key = setting.key.replace("company_", "");
+        const camelKey = key.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
+        info[camelKey] = setting.value || "";
+      });
+      setCompanyInfo((prev) => ({ ...prev, ...info }));
+    }
   };
 
   const total = services.reduce((sum, service) => sum + Number(service.price), 0);
@@ -140,10 +173,16 @@ export function InvoiceDialog({ open, onOpenChange, appointment }: InvoiceDialog
               <p className="text-xs sm:text-sm text-gray-600">Datum: {format(new Date(), "dd MMMM yyyy", { locale: nl })}</p>
             </div>
             <div className="sm:text-right">
-              <h2 className="font-bold text-lg sm:text-xl mb-2">Car Detail Exclusief</h2>
-              <p className="text-xs sm:text-sm text-gray-600">Adres bedrijf</p>
-              <p className="text-xs sm:text-sm text-gray-600">Postcode, Stad</p>
-              <p className="text-xs sm:text-sm text-gray-600">BTW: BE0123456789</p>
+              <h2 className="font-bold text-lg sm:text-xl mb-2">{companyInfo.name}</h2>
+              <p className="text-xs sm:text-sm text-gray-600">{companyInfo.address}</p>
+              <p className="text-xs sm:text-sm text-gray-600">{companyInfo.postalCity}</p>
+              <p className="text-xs sm:text-sm text-gray-600">BTW: {companyInfo.vatNumber}</p>
+              {companyInfo.email && (
+                <p className="text-xs sm:text-sm text-gray-600">{companyInfo.email}</p>
+              )}
+              {companyInfo.phone && (
+                <p className="text-xs sm:text-sm text-gray-600">{companyInfo.phone}</p>
+              )}
             </div>
           </div>
 
@@ -236,8 +275,11 @@ export function InvoiceDialog({ open, onOpenChange, appointment }: InvoiceDialog
 
           {/* Footer */}
           <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-gray-200 text-center text-xs sm:text-sm text-gray-600">
-            <p>Bedankt voor uw vertrouwen in Car Detail Exclusief</p>
+            <p>Bedankt voor uw vertrouwen in {companyInfo.name}</p>
             <p className="mt-2">Betaling binnen 14 dagen na factuurdatum</p>
+            {companyInfo.email && (
+              <p className="mt-1">Contact: {companyInfo.email}</p>
+            )}
           </div>
         </div>
       </DialogContent>
