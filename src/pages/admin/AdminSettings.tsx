@@ -88,6 +88,7 @@ export default function AdminSettings() {
       company_address: "Bedrijfsadres",
       company_postal_city: "Postcode en Plaats",
       company_vat_number: "BTW-nummer",
+      company_kvk_number: "KVK-nummer",
       company_email: "E-mailadres",
       company_phone: "Telefoonnummer",
     };

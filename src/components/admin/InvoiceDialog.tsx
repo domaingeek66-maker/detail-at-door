@@ -45,6 +45,7 @@ export function InvoiceDialog({ open, onOpenChange, appointment }: InvoiceDialog
     address: "Adres bedrijf",
     postalCity: "Postcode, Stad",
     vatNumber: "BE0123456789",
+    kvkNumber: "12345678",
     email: "info@cardetail.be",
     phone: "+32 123 45 67 89",
   });
@@ -77,6 +78,7 @@ export function InvoiceDialog({ open, onOpenChange, appointment }: InvoiceDialog
         "company_address",
         "company_postal_city",
         "company_vat_number",
+        "company_kvk_number",
         "company_email",
         "company_phone",
       ]);
@@ -176,7 +178,12 @@ export function InvoiceDialog({ open, onOpenChange, appointment }: InvoiceDialog
               <h2 className="font-bold text-lg sm:text-xl mb-2">{companyInfo.name}</h2>
               <p className="text-xs sm:text-sm text-gray-600">{companyInfo.address}</p>
               <p className="text-xs sm:text-sm text-gray-600">{companyInfo.postalCity}</p>
-              <p className="text-xs sm:text-sm text-gray-600">BTW: {companyInfo.vatNumber}</p>
+              {companyInfo.vatNumber && (
+                <p className="text-xs sm:text-sm text-gray-600">BTW: {companyInfo.vatNumber}</p>
+              )}
+              {companyInfo.kvkNumber && (
+                <p className="text-xs sm:text-sm text-gray-600">KVK: {companyInfo.kvkNumber}</p>
+              )}
               {companyInfo.email && (
                 <p className="text-xs sm:text-sm text-gray-600">{companyInfo.email}</p>
               )}
