@@ -18,12 +18,17 @@ export type Database = {
         Row: {
           appointment_date: string
           appointment_time: string
+          city: string | null
           created_at: string
           customer_id: string
+          distance_km: number | null
           id: string
           notes: string | null
+          postal_code: string | null
           service_ids: string[]
           status: string
+          street_address: string | null
+          travel_cost: number | null
           updated_at: string
           vehicle_make: string
           vehicle_model: string
@@ -31,12 +36,17 @@ export type Database = {
         Insert: {
           appointment_date: string
           appointment_time: string
+          city?: string | null
           created_at?: string
           customer_id: string
+          distance_km?: number | null
           id?: string
           notes?: string | null
+          postal_code?: string | null
           service_ids: string[]
           status?: string
+          street_address?: string | null
+          travel_cost?: number | null
           updated_at?: string
           vehicle_make: string
           vehicle_model: string
@@ -44,12 +54,17 @@ export type Database = {
         Update: {
           appointment_date?: string
           appointment_time?: string
+          city?: string | null
           created_at?: string
           customer_id?: string
+          distance_km?: number | null
           id?: string
           notes?: string | null
+          postal_code?: string | null
           service_ids?: string[]
           status?: string
+          street_address?: string | null
+          travel_cost?: number | null
           updated_at?: string
           vehicle_make?: string
           vehicle_model?: string

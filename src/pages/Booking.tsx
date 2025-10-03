@@ -21,7 +21,9 @@ const bookingSchema = z.object({
   name: z.string().min(2, "Naam moet minimaal 2 karakters zijn").max(100),
   email: z.string().email("Ongeldig e-mailadres").max(255),
   phone: z.string().min(10, "Ongeldig telefoonnummer").max(20),
-  address: z.string().min(5, "Adres moet minimaal 5 karakters zijn").max(200),
+  streetAddress: z.string().min(5, "Straat en huisnummer is verplicht").max(200),
+  postalCode: z.string().min(4, "Postcode is verplicht").max(10),
+  city: z.string().min(2, "Plaats is verplicht").max(100),
   vehicleMake: z.string().min(2, "Merk is verplicht").max(50),
   vehicleModel: z.string().min(2, "Model is verplicht").max(50),
   notes: z.string().max(500).optional(),
@@ -36,6 +38,11 @@ const Booking = () => {
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [formData, setFormData] = useState<Partial<BookingForm>>({});
   const [errors, setErrors] = useState<Partial<Record<keyof BookingForm, string>>>({});
+  const [travelInfo, setTravelInfo] = useState<{
+    distance: number;
+    travel_cost: number;
+    outside_service_area: boolean;
+  } | null>(null);
   const navigate = useNavigate();
 
   // Clear selected time when services or date changes
@@ -113,21 +120,21 @@ const Booking = () => {
       
       setErrors({});
 
-      // Create customer
+      // Create customer - address is already separated in customers table
       const { data: customer, error: customerError } = await supabase
         .from('customers')
         .insert({
           name: formData.name!,
           email: formData.email!,
           phone: formData.phone!,
-          address: formData.address!,
+          address: `${formData.streetAddress}, ${formData.postalCode} ${formData.city}`,
         })
         .select()
         .single();
 
       if (customerError) throw customerError;
 
-      // Create appointment
+      // Create appointment with separated address fields and travel cost
       const { error: appointmentError } = await supabase
         .from('appointments')
         .insert({
@@ -139,6 +146,11 @@ const Booking = () => {
           appointment_time: selectedTime + ':00',
           notes: formData.notes || null,
           status: 'pending',
+          street_address: formData.streetAddress!,
+          postal_code: formData.postalCode!,
+          city: formData.city!,
+          travel_cost: travelInfo?.travel_cost || 0,
+          distance_km: travelInfo?.distance || 0,
         });
 
       if (appointmentError) throw appointmentError;
@@ -176,7 +188,7 @@ const Booking = () => {
       .reduce((sum, s) => sum + s.duration_min, 0);
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step === 1 && selectedServices.length === 0) {
       toast.error("Selecteer minimaal één dienst");
       return;
@@ -184,6 +196,41 @@ const Booking = () => {
     if (step === 2 && (!selectedDate || !selectedTime)) {
       toast.error("Selecteer een datum en tijd");
       return;
+    }
+    if (step === 3) {
+      // Validate address fields and calculate travel cost
+      if (!formData.streetAddress || !formData.postalCode || !formData.city) {
+        toast.error("Vul alle adresvelden in");
+        return;
+      }
+
+      try {
+        toast.loading("Afstand berekenen...");
+        const { data, error } = await supabase.functions.invoke('calculate-travel-cost', {
+          body: {
+            street_address: formData.streetAddress,
+            postal_code: formData.postalCode,
+            city: formData.city,
+          },
+        });
+
+        toast.dismiss();
+
+        if (error) throw error;
+
+        setTravelInfo(data);
+
+        if (data.outside_service_area) {
+          toast.warning(
+            `Dit adres ligt ${data.distance} km van ons (${data.service_area_radius} km radius). Extra reiskosten: €${data.travel_cost}`,
+            { duration: 6000 }
+          );
+        }
+      } catch (error) {
+        toast.dismiss();
+        toast.error("Kon afstand niet berekenen. Controleer het adres.");
+        return;
+      }
     }
     setStep(step + 1);
   };
@@ -426,15 +473,43 @@ const Booking = () => {
                       />
                       {errors.phone && <p className="text-sm text-destructive mt-1">{errors.phone}</p>}
                     </div>
-                    <div>
-                      <Label htmlFor="address">Adres *</Label>
-                      <Input 
-                        id="address"
-                        value={formData.address || ''}
-                        onChange={(e) => setFormData({...formData, address: e.target.value})}
-                        placeholder="Straat 123, Stad"
-                      />
-                      {errors.address && <p className="text-sm text-destructive mt-1">{errors.address}</p>}
+                  </div>
+
+                  <div className="border-t border-border pt-6">
+                    <h3 className="text-lg font-semibold mb-4">📍 Uw Adres (waar mogen we langskomen?)</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor="streetAddress">Straat en Huisnummer *</Label>
+                        <Input 
+                          id="streetAddress"
+                          value={formData.streetAddress || ''}
+                          onChange={(e) => setFormData({...formData, streetAddress: e.target.value})}
+                          placeholder="Hoofdstraat 123"
+                        />
+                        {errors.streetAddress && <p className="text-sm text-destructive mt-1">{errors.streetAddress}</p>}
+                      </div>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="postalCode">Postcode *</Label>
+                          <Input 
+                            id="postalCode"
+                            value={formData.postalCode || ''}
+                            onChange={(e) => setFormData({...formData, postalCode: e.target.value})}
+                            placeholder="1000"
+                          />
+                          {errors.postalCode && <p className="text-sm text-destructive mt-1">{errors.postalCode}</p>}
+                        </div>
+                        <div>
+                          <Label htmlFor="city">Plaats *</Label>
+                          <Input 
+                            id="city"
+                            value={formData.city || ''}
+                            onChange={(e) => setFormData({...formData, city: e.target.value})}
+                            placeholder="Brussel"
+                          />
+                          {errors.city && <p className="text-sm text-destructive mt-1">{errors.city}</p>}
+                        </div>
+                      </div>
                     </div>
                   </div>
                   
@@ -503,11 +578,28 @@ const Booking = () => {
                     <h3 className="font-semibold mb-2">Gekozen Diensten</h3>
                     <ul className="space-y-1">
                       {services?.filter(s => selectedServices.includes(s.id)).map(s => (
-                        <li key={s.id} className="text-muted-foreground">
-                          • {s.name} (€{s.price})
+                        <li key={s.id} className="text-muted-foreground flex justify-between">
+                          <span>• {s.name}</span>
+                          <span>€{s.price}</span>
                         </li>
                       ))}
+                      {travelInfo && travelInfo.travel_cost > 0 && (
+                        <li className="text-amber-600 flex justify-between border-t border-border pt-1 mt-1">
+                          <span>• Reiskosten ({travelInfo.distance} km)</span>
+                          <span>€{travelInfo.travel_cost.toFixed(2)}</span>
+                        </li>
+                      )}
                     </ul>
+                    <div className="mt-3 pt-3 border-t border-border flex justify-between font-bold text-lg">
+                      <span>Totaal:</span>
+                      <span>
+                        €{(
+                          (services?.filter(s => selectedServices.includes(s.id))
+                            .reduce((sum, s) => sum + Number(s.price), 0) || 0) +
+                          (travelInfo?.travel_cost || 0)
+                        ).toFixed(2)}
+                      </span>
+                    </div>
                   </div>
                   
                   <div>
@@ -522,7 +614,14 @@ const Booking = () => {
                     <p className="text-muted-foreground">{formData.name}</p>
                     <p className="text-muted-foreground">{formData.email}</p>
                     <p className="text-muted-foreground">{formData.phone}</p>
-                    <p className="text-muted-foreground">{formData.address}</p>
+                    <p className="text-muted-foreground">
+                      {formData.streetAddress}, {formData.postalCode} {formData.city}
+                    </p>
+                    {travelInfo && travelInfo.travel_cost > 0 && (
+                      <p className="text-sm text-amber-600 mt-2">
+                        ⚠️ Dit adres ligt {travelInfo.distance} km van ons. Extra reiskosten: €{travelInfo.travel_cost.toFixed(2)}
+                      </p>
+                    )}
                   </div>
                   
                   <div>

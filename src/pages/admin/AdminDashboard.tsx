@@ -35,6 +35,11 @@ interface Appointment {
   notes: string;
   customer_id: string;
   service_ids: string[];
+  street_address: string;
+  postal_code: string;
+  city: string;
+  travel_cost: number;
+  distance_km: number;
   customers: {
     name: string;
     email: string;
@@ -182,6 +187,14 @@ export default function AdminDashboard() {
                     <div className="text-sm text-muted-foreground ml-6">
                       <div>{appointment.customers.email}</div>
                       <div>{appointment.customers.phone}</div>
+                      <div className="mt-1 text-xs">
+                        📍 {appointment.street_address}, {appointment.postal_code} {appointment.city}
+                      </div>
+                      {appointment.travel_cost > 0 && (
+                        <div className="text-amber-600 text-xs mt-1">
+                          🚗 {appointment.distance_km} km · Reiskosten: €{appointment.travel_cost.toFixed(2)}
+                        </div>
+                      )}
                     </div>
                   </div>
 

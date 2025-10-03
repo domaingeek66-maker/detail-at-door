@@ -24,6 +24,11 @@ interface InvoiceDialogProps {
     vehicle_model: string;
     notes: string;
     service_ids: string[];
+    street_address: string;
+    postal_code: string;
+    city: string;
+    travel_cost: number;
+    distance_km: number;
     customers: {
       name: string;
       email: string;
@@ -55,8 +60,10 @@ export function InvoiceDialog({ open, onOpenChange, appointment }: InvoiceDialog
   };
 
   const total = services.reduce((sum, service) => sum + Number(service.price), 0);
-  const btw = total * 0.21;
-  const totalWithBtw = total + btw;
+  const travelCost = Number(appointment.travel_cost || 0);
+  const subtotal = total + travelCost;
+  const btw = subtotal * 0.21;
+  const totalWithBtw = subtotal + btw;
 
   const handlePrint = () => {
     const invoiceEl = document.getElementById("invoice");
@@ -146,6 +153,9 @@ export function InvoiceDialog({ open, onOpenChange, appointment }: InvoiceDialog
             <p className="text-xs sm:text-sm">{appointment.customers.name}</p>
             <p className="text-xs sm:text-sm text-gray-600">{appointment.customers.email}</p>
             <p className="text-xs sm:text-sm text-gray-600">{appointment.customers.phone}</p>
+            <p className="text-xs sm:text-sm text-gray-600 mt-1">
+              {appointment.street_address}, {appointment.postal_code} {appointment.city}
+            </p>
           </div>
 
           {/* Appointment Details */}
@@ -175,13 +185,24 @@ export function InvoiceDialog({ open, onOpenChange, appointment }: InvoiceDialog
                     <td colSpan={3} className="text-center py-4 text-xs sm:text-sm">Laden...</td>
                   </tr>
                 ) : (
-                  services.map((service) => (
-                    <tr key={service.id} className="border-b border-gray-200">
-                      <td className="py-3 text-xs sm:text-sm">{service.name}</td>
-                      <td className="text-right py-3 text-xs sm:text-sm">{service.duration_min} min</td>
-                      <td className="text-right py-3 text-xs sm:text-sm">€ {Number(service.price).toFixed(2)}</td>
-                    </tr>
-                  ))
+                  <>
+                    {services.map((service) => (
+                      <tr key={service.id} className="border-b border-gray-200">
+                        <td className="py-3 text-xs sm:text-sm">{service.name}</td>
+                        <td className="text-right py-3 text-xs sm:text-sm">{service.duration_min} min</td>
+                        <td className="text-right py-3 text-xs sm:text-sm">€ {Number(service.price).toFixed(2)}</td>
+                      </tr>
+                    ))}
+                    {travelCost > 0 && (
+                      <tr className="border-b border-gray-200">
+                        <td className="py-3 text-xs sm:text-sm">
+                          Reiskosten ({appointment.distance_km} km)
+                        </td>
+                        <td className="text-right py-3 text-xs sm:text-sm">-</td>
+                        <td className="text-right py-3 text-xs sm:text-sm">€ {travelCost.toFixed(2)}</td>
+                      </tr>
+                    )}
+                  </>
                 )}
               </tbody>
             </table>
@@ -192,7 +213,7 @@ export function InvoiceDialog({ open, onOpenChange, appointment }: InvoiceDialog
             <div className="w-full sm:w-64">
               <div className="flex justify-between py-2 text-xs sm:text-sm">
                 <span>Subtotaal:</span>
-                <span>€ {total.toFixed(2)}</span>
+                <span>€ {subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between py-2 text-xs sm:text-sm">
                 <span>BTW (21%):</span>
