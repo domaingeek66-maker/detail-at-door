@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -18,9 +19,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
-import { Trash2, FileText } from "lucide-react";
+import { Trash2, FileText, Calendar as CalendarIcon, Clock, User, Car } from "lucide-react";
 import { InvoiceDialog } from "@/components/admin/InvoiceDialog";
 
 interface Appointment {
@@ -45,6 +47,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     fetchAppointments();
@@ -149,46 +152,50 @@ export default function AdminDashboard() {
         </p>
       </div>
 
-      <div className="bg-card border border-border rounded-xl overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Datum</TableHead>
-              <TableHead>Tijd</TableHead>
-              <TableHead>Klant</TableHead>
-              <TableHead>Contact</TableHead>
-              <TableHead>Voertuig</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Acties</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {appointments.map((appointment) => (
-              <TableRow key={appointment.id}>
-                <TableCell>
-                  {format(new Date(appointment.appointment_date), "dd MMMM yyyy", { locale: nl })}
-                </TableCell>
-                <TableCell>{appointment.appointment_time}</TableCell>
-                <TableCell className="font-medium">
-                  {appointment.customers.name}
-                </TableCell>
-                <TableCell>
-                  <div className="text-sm">
-                    <div>{appointment.customers.email}</div>
-                    <div className="text-muted-foreground">{appointment.customers.phone}</div>
+      {isMobile ? (
+        <div className="space-y-4">
+          {appointments.map((appointment) => (
+            <Card key={appointment.id} className="overflow-hidden">
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-sm">
+                        <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">
+                          {format(new Date(appointment.appointment_date), "dd MMMM yyyy", { locale: nl })}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Clock className="h-4 w-4" />
+                        <span>{appointment.appointment_time}</span>
+                      </div>
+                    </div>
+                    {getStatusBadge(appointment.status)}
                   </div>
-                </TableCell>
-                <TableCell>
-                  {appointment.vehicle_make} {appointment.vehicle_model}
-                </TableCell>
-                <TableCell>{getStatusBadge(appointment.status)}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
+
+                  <div className="pt-2 border-t border-border space-y-2">
+                    <div className="flex items-center gap-2 text-sm">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      <span className="font-medium">{appointment.customers.name}</span>
+                    </div>
+                    <div className="text-sm text-muted-foreground ml-6">
+                      <div>{appointment.customers.email}</div>
+                      <div>{appointment.customers.phone}</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm pt-2 border-t border-border">
+                    <Car className="h-4 w-4 text-muted-foreground" />
+                    <span>{appointment.vehicle_make} {appointment.vehicle_model}</span>
+                  </div>
+
+                  <div className="pt-3 space-y-2">
                     <Select
                       value={appointment.status}
                       onValueChange={(value) => updateStatus(appointment.id, value)}
                     >
-                      <SelectTrigger className="w-[140px]">
+                      <SelectTrigger className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -198,28 +205,103 @@ export default function AdminDashboard() {
                         <SelectItem value="cancelled">Geannuleerd</SelectItem>
                       </SelectContent>
                     </Select>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setSelectedAppointment(appointment)}
-                      title="Factuur genereren"
-                    >
-                      <FileText className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => deleteAppointment(appointment.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => setSelectedAppointment(appointment)}
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        Factuur
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => deleteAppointment(appointment.id)}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Verwijder
+                      </Button>
+                    </div>
                   </div>
-                </TableCell>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="bg-card border border-border rounded-xl overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Datum</TableHead>
+                <TableHead>Tijd</TableHead>
+                <TableHead>Klant</TableHead>
+                <TableHead>Contact</TableHead>
+                <TableHead>Voertuig</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Acties</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody>
+              {appointments.map((appointment) => (
+                <TableRow key={appointment.id}>
+                  <TableCell>
+                    {format(new Date(appointment.appointment_date), "dd MMMM yyyy", { locale: nl })}
+                  </TableCell>
+                  <TableCell>{appointment.appointment_time}</TableCell>
+                  <TableCell className="font-medium">
+                    {appointment.customers.name}
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      <div>{appointment.customers.email}</div>
+                      <div className="text-muted-foreground">{appointment.customers.phone}</div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {appointment.vehicle_make} {appointment.vehicle_model}
+                  </TableCell>
+                  <TableCell>{getStatusBadge(appointment.status)}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Select
+                        value={appointment.status}
+                        onValueChange={(value) => updateStatus(appointment.id, value)}
+                      >
+                        <SelectTrigger className="w-[140px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="pending">In afwachting</SelectItem>
+                          <SelectItem value="confirmed">Bevestigd</SelectItem>
+                          <SelectItem value="completed">Voltooid</SelectItem>
+                          <SelectItem value="cancelled">Geannuleerd</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setSelectedAppointment(appointment)}
+                        title="Factuur genereren"
+                      >
+                        <FileText className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => deleteAppointment(appointment.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
 
       {selectedAppointment && (
         <InvoiceDialog

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -9,8 +10,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
+import { User, Mail, Phone, MapPin, Calendar as CalendarIcon } from "lucide-react";
 
 interface Customer {
   id: string;
@@ -25,6 +28,7 @@ export default function AdminCustomers() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     fetchCustomers();
@@ -62,32 +66,67 @@ export default function AdminCustomers() {
         </p>
       </div>
 
-      <div className="bg-card border border-border rounded-xl overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Naam</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Telefoon</TableHead>
-              <TableHead>Adres</TableHead>
-              <TableHead>Geregistreerd op</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {customers.map((customer) => (
-              <TableRow key={customer.id}>
-                <TableCell className="font-medium">{customer.name}</TableCell>
-                <TableCell>{customer.email}</TableCell>
-                <TableCell>{customer.phone}</TableCell>
-                <TableCell>{customer.address}</TableCell>
-                <TableCell>
-                  {format(new Date(customer.created_at), "dd MMMM yyyy", { locale: nl })}
-                </TableCell>
+      {isMobile ? (
+        <div className="space-y-4">
+          {customers.map((customer) => (
+            <Card key={customer.id}>
+              <CardContent className="p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  <span className="font-semibold">{customer.name}</span>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex items-start gap-2">
+                    <Mail className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                    <span className="break-all">{customer.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <span>{customer.phone}</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                    <span>{customer.address}</span>
+                  </div>
+                  <div className="flex items-center gap-2 pt-2 border-t border-border text-muted-foreground">
+                    <CalendarIcon className="h-4 w-4 shrink-0" />
+                    <span>
+                      {format(new Date(customer.created_at), "dd MMMM yyyy", { locale: nl })}
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="bg-card border border-border rounded-xl overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Naam</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Telefoon</TableHead>
+                <TableHead>Adres</TableHead>
+                <TableHead>Geregistreerd op</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody>
+              {customers.map((customer) => (
+                <TableRow key={customer.id}>
+                  <TableCell className="font-medium">{customer.name}</TableCell>
+                  <TableCell>{customer.email}</TableCell>
+                  <TableCell>{customer.phone}</TableCell>
+                  <TableCell>{customer.address}</TableCell>
+                  <TableCell>
+                    {format(new Date(customer.created_at), "dd MMMM yyyy", { locale: nl })}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
   );
 }

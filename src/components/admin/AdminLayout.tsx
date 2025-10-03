@@ -2,8 +2,15 @@ import { useEffect, useState } from "react";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut, Calendar, Users, Settings, Clock, Menu, X } from "lucide-react";
+import { LogOut, Calendar, Users, Settings, Clock, Menu } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 export default function AdminLayout() {
   const [loading, setLoading] = useState(true);
@@ -65,13 +72,59 @@ export default function AdminLayout() {
       <header className="border-b border-border bg-card sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 hover:bg-muted rounded-lg transition-smooth"
-              aria-label="Toggle menu"
-            >
-              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <button
+                  className="lg:hidden p-2 hover:bg-muted rounded-lg transition-smooth"
+                  aria-label="Toggle menu"
+                >
+                  <Menu className="h-5 w-5" />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[280px]">
+                <SheetHeader>
+                  <SheetTitle>Navigatie</SheetTitle>
+                </SheetHeader>
+                <nav className="flex flex-col gap-2 mt-6">
+                  <Link to="/admin/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                    <Button
+                      variant={isActive("/admin/dashboard") ? "default" : "ghost"}
+                      className="w-full justify-start"
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      Afspraken
+                    </Button>
+                  </Link>
+                  <Link to="/admin/customers" onClick={() => setMobileMenuOpen(false)}>
+                    <Button
+                      variant={isActive("/admin/customers") ? "default" : "ghost"}
+                      className="w-full justify-start"
+                    >
+                      <Users className="mr-2 h-4 w-4" />
+                      Klanten
+                    </Button>
+                  </Link>
+                  <Link to="/admin/availability" onClick={() => setMobileMenuOpen(false)}>
+                    <Button
+                      variant={isActive("/admin/availability") ? "default" : "ghost"}
+                      className="w-full justify-start"
+                    >
+                      <Clock className="mr-2 h-4 w-4" />
+                      Beschikbaarheid
+                    </Button>
+                  </Link>
+                  <Link to="/admin/settings" onClick={() => setMobileMenuOpen(false)}>
+                    <Button
+                      variant={isActive("/admin/settings") ? "default" : "ghost"}
+                      className="w-full justify-start"
+                    >
+                      <Settings className="mr-2 h-4 w-4" />
+                      Instellingen
+                    </Button>
+                  </Link>
+                </nav>
+              </SheetContent>
+            </Sheet>
             <h1 className="text-xl sm:text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
               Admin Dashboard
             </h1>
@@ -125,53 +178,6 @@ export default function AdminLayout() {
             </Link>
           </nav>
 
-          {/* Mobile Sidebar */}
-          {mobileMenuOpen && (
-            <div className="fixed inset-0 z-30 lg:hidden">
-              <div 
-                className="absolute inset-0 bg-background/95 backdrop-blur-lg"
-                onClick={() => setMobileMenuOpen(false)}
-              />
-              <nav className="relative bg-card border-r border-border w-64 h-full p-4 space-y-2">
-                <Link to="/admin/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                  <Button
-                    variant={isActive("/admin/dashboard") ? "default" : "ghost"}
-                    className="w-full justify-start"
-                  >
-                    <Calendar className="mr-2 h-4 w-4" />
-                    Afspraken
-                  </Button>
-                </Link>
-                <Link to="/admin/customers" onClick={() => setMobileMenuOpen(false)}>
-                  <Button
-                    variant={isActive("/admin/customers") ? "default" : "ghost"}
-                    className="w-full justify-start"
-                  >
-                    <Users className="mr-2 h-4 w-4" />
-                    Klanten
-                  </Button>
-                </Link>
-                <Link to="/admin/availability" onClick={() => setMobileMenuOpen(false)}>
-                  <Button
-                    variant={isActive("/admin/availability") ? "default" : "ghost"}
-                    className="w-full justify-start"
-                  >
-                    <Clock className="mr-2 h-4 w-4" />
-                    Beschikbaarheid
-                  </Button>
-                </Link>
-                <Link to="/admin/settings" onClick={() => setMobileMenuOpen(false)}>
-                  <Button
-                    variant={isActive("/admin/settings") ? "default" : "ghost"}
-                    className="w-full justify-start"
-                  >
-                    <Settings className="mr-2 h-4 w-4" />
-                    Instellingen
-                  </Button>
-                </Link>
-              </nav>
-            </div>
-          )}
 
           <main className="flex-1 min-w-0">
             <Outlet />
