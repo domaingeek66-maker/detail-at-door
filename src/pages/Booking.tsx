@@ -137,17 +137,14 @@ const Booking = () => {
       const discountAmount = appliedDiscount?.amount || 0;
       const finalPrice = originalPrice - discountAmount;
 
-      // Create customer - address is already separated in customers table
-      const { data: customer, error: customerError } = await supabase
-        .from('customers')
-        .insert({
-          name: formData.name!,
-          email: formData.email!,
-          phone: formData.phone!,
-          address: `${formData.streetAddress}, ${formData.postalCode} ${formData.city}`,
-        })
-        .select()
-        .single();
+      // Create customer using secure RPC function with validation
+      const { data: customerId, error: customerError } = await supabase
+        .rpc('create_customer', {
+          _name: formData.name!,
+          _email: formData.email!,
+          _phone: formData.phone!,
+          _address: `${formData.streetAddress}, ${formData.postalCode} ${formData.city}`,
+        });
 
       if (customerError) throw customerError;
 
@@ -155,7 +152,7 @@ const Booking = () => {
       const { error: appointmentError } = await supabase
         .from('appointments')
         .insert({
-          customer_id: customer.id,
+          customer_id: customerId,
           service_ids: selectedServices,
           vehicle_make: formData.vehicleMake!,
           vehicle_model: formData.vehicleModel!,
