@@ -14,7 +14,7 @@ import { format } from "date-fns";
 import { nl } from "date-fns/locale";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle2, Calendar as CalendarIcon, User, Car as CarIcon } from "lucide-react";
+import { CheckCircle2, Calendar as CalendarIcon, User, Car as CarIcon, Tag, X } from "lucide-react";
 import { z } from "zod";
 
 const bookingSchema = z.object({
@@ -43,6 +43,16 @@ const Booking = () => {
     travel_cost: number;
     outside_service_area: boolean;
   } | null>(null);
+  const [discountCode, setDiscountCode] = useState("");
+  const [appliedDiscount, setAppliedDiscount] = useState<{
+    id: string;
+    code: string;
+    type: 'percentage' | 'fixed';
+    value: number;
+    amount: number;
+  } | null>(null);
+  const [discountError, setDiscountError] = useState("");
+  const [isValidatingDiscount, setIsValidatingDiscount] = useState(false);
   const navigate = useNavigate();
 
   // Clear selected time when services or date changes
@@ -120,6 +130,13 @@ const Booking = () => {
       
       setErrors({});
 
+      // Calculate prices
+      const originalPrice = (services?.filter(s => selectedServices.includes(s.id))
+        .reduce((sum, s) => sum + Number(s.price), 0) || 0) + (travelInfo?.travel_cost || 0);
+      
+      const discountAmount = appliedDiscount?.amount || 0;
+      const finalPrice = originalPrice - discountAmount;
+
       // Create customer - address is already separated in customers table
       const { data: customer, error: customerError } = await supabase
         .from('customers')
@@ -151,9 +168,29 @@ const Booking = () => {
           city: formData.city!,
           travel_cost: travelInfo?.travel_cost || 0,
           distance_km: travelInfo?.distance || 0,
+          discount_code_id: appliedDiscount?.id || null,
+          original_price: originalPrice,
+          discount_amount: discountAmount,
+          final_price: finalPrice,
         });
 
       if (appointmentError) throw appointmentError;
+
+      // Update discount code usage if applied
+      if (appliedDiscount) {
+        const { data: currentDiscount } = await supabase
+          .from('discount_codes')
+          .select('times_used')
+          .eq('id', appliedDiscount.id)
+          .single();
+        
+        if (currentDiscount) {
+          await supabase
+            .from('discount_codes')
+            .update({ times_used: currentDiscount.times_used + 1 })
+            .eq('id', appliedDiscount.id);
+        }
+      }
     },
     onSuccess: () => {
       setStep(5);
@@ -186,6 +223,91 @@ const Booking = () => {
     return services
       .filter(s => selectedServices.includes(s.id))
       .reduce((sum, s) => sum + s.duration_min, 0);
+  };
+
+  const calculateTotalPrice = () => {
+    const serviceTotal = services?.filter(s => selectedServices.includes(s.id))
+      .reduce((sum, s) => sum + Number(s.price), 0) || 0;
+    const travelCost = travelInfo?.travel_cost || 0;
+    return serviceTotal + travelCost;
+  };
+
+  const validateDiscountCode = async () => {
+    if (!discountCode.trim()) return;
+
+    setIsValidatingDiscount(true);
+    setDiscountError("");
+
+    try {
+      const { data, error } = await supabase
+        .from('discount_codes')
+        .select('*')
+        .eq('code', discountCode.toUpperCase())
+        .eq('is_active', true)
+        .single();
+
+      if (error || !data) {
+        setDiscountError("Ongeldige kortingscode");
+        setAppliedDiscount(null);
+        return;
+      }
+
+      const now = new Date();
+      const validFrom = new Date(data.valid_from);
+      const validUntil = data.valid_until ? new Date(data.valid_until) : null;
+
+      if (now < validFrom) {
+        setDiscountError("Deze kortingscode is nog niet geldig");
+        setAppliedDiscount(null);
+        return;
+      }
+
+      if (validUntil && now > validUntil) {
+        setDiscountError("Deze kortingscode is verlopen");
+        setAppliedDiscount(null);
+        return;
+      }
+
+      if (data.max_uses && data.times_used >= data.max_uses) {
+        setDiscountError("Deze kortingscode is niet meer geldig");
+        setAppliedDiscount(null);
+        return;
+      }
+
+      const totalPrice = calculateTotalPrice();
+      
+      if (totalPrice < data.min_order_amount) {
+        setDiscountError(`Minimaal bestelbedrag is €${data.min_order_amount}`);
+        setAppliedDiscount(null);
+        return;
+      }
+
+      const discountAmount = data.discount_type === 'percentage'
+        ? (totalPrice * data.discount_value) / 100
+        : data.discount_value;
+
+      setAppliedDiscount({
+        id: data.id,
+        code: data.code,
+        type: data.discount_type as 'percentage' | 'fixed',
+        value: data.discount_value,
+        amount: Math.min(discountAmount, totalPrice),
+      });
+
+      toast.success(`Kortingscode toegepast! €${Math.min(discountAmount, totalPrice).toFixed(2)} korting`);
+    } catch (error) {
+      console.error("Error validating discount:", error);
+      setDiscountError("Fout bij valideren kortingscode");
+      setAppliedDiscount(null);
+    } finally {
+      setIsValidatingDiscount(false);
+    }
+  };
+
+  const removeDiscount = () => {
+    setDiscountCode("");
+    setAppliedDiscount(null);
+    setDiscountError("");
   };
 
   const handleNext = async () => {
@@ -590,14 +712,70 @@ const Booking = () => {
                         </li>
                       )}
                     </ul>
+
+                    {!appliedDiscount ? (
+                      <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+                        <Label htmlFor="discountCode" className="text-sm">Kortingscode (optioneel)</Label>
+                        <div className="flex gap-2 mt-2">
+                          <Input
+                            id="discountCode"
+                            value={discountCode}
+                            onChange={(e) => {
+                              setDiscountCode(e.target.value.toUpperCase());
+                              setDiscountError("");
+                            }}
+                            placeholder="KORTINGSCODE"
+                            className="flex-1"
+                          />
+                          <Button 
+                            onClick={validateDiscountCode}
+                            disabled={!discountCode.trim() || isValidatingDiscount}
+                            size="sm"
+                          >
+                            {isValidatingDiscount ? "..." : "Toepassen"}
+                          </Button>
+                        </div>
+                        {discountError && (
+                          <p className="text-sm text-destructive mt-2">{discountError}</p>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="mt-4 p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-900">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="text-sm font-semibold text-green-700 dark:text-green-400">
+                              Kortingscode toegepast: {appliedDiscount.code}
+                            </p>
+                            <p className="text-xs text-green-600 dark:text-green-500">
+                              {appliedDiscount.type === 'percentage' 
+                                ? `${appliedDiscount.value}% korting` 
+                                : `€${appliedDiscount.value} korting`}
+                            </p>
+                          </div>
+                          <Button variant="ghost" size="sm" onClick={removeDiscount}>
+                            Verwijderen
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {appliedDiscount && (
+                      <div className="mt-3 pt-3 border-t border-border space-y-1">
+                        <div className="flex justify-between text-muted-foreground">
+                          <span>Subtotaal:</span>
+                          <span>€{calculateTotalPrice().toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-green-600 font-semibold">
+                          <span>Korting:</span>
+                          <span>- €{appliedDiscount.amount.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="mt-3 pt-3 border-t border-border flex justify-between font-bold text-lg">
                       <span>Totaal:</span>
                       <span>
-                        €{(
-                          (services?.filter(s => selectedServices.includes(s.id))
-                            .reduce((sum, s) => sum + Number(s.price), 0) || 0) +
-                          (travelInfo?.travel_cost || 0)
-                        ).toFixed(2)}
+                        €{(calculateTotalPrice() - (appliedDiscount?.amount || 0)).toFixed(2)}
                       </span>
                     </div>
                   </div>

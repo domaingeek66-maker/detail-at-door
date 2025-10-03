@@ -21,9 +21,13 @@ export type Database = {
           city: string | null
           created_at: string
           customer_id: string
+          discount_amount: number | null
+          discount_code_id: string | null
           distance_km: number | null
+          final_price: number | null
           id: string
           notes: string | null
+          original_price: number | null
           postal_code: string | null
           service_ids: string[]
           status: string
@@ -39,9 +43,13 @@ export type Database = {
           city?: string | null
           created_at?: string
           customer_id: string
+          discount_amount?: number | null
+          discount_code_id?: string | null
           distance_km?: number | null
+          final_price?: number | null
           id?: string
           notes?: string | null
+          original_price?: number | null
           postal_code?: string | null
           service_ids: string[]
           status?: string
@@ -57,9 +65,13 @@ export type Database = {
           city?: string | null
           created_at?: string
           customer_id?: string
+          discount_amount?: number | null
+          discount_code_id?: string | null
           distance_km?: number | null
+          final_price?: number | null
           id?: string
           notes?: string | null
+          original_price?: number | null
           postal_code?: string | null
           service_ids?: string[]
           status?: string
@@ -75,6 +87,13 @@ export type Database = {
             columns: ["customer_id"]
             isOneToOne: false
             referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_discount_code_id_fkey"
+            columns: ["discount_code_id"]
+            isOneToOne: false
+            referencedRelation: "discount_codes"
             referencedColumns: ["id"]
           },
         ]
@@ -169,6 +188,54 @@ export type Database = {
           id?: string
           name?: string
           phone?: string
+        }
+        Relationships: []
+      }
+      discount_codes: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          discount_type: string
+          discount_value: number
+          id: string
+          is_active: boolean
+          max_uses: number | null
+          min_order_amount: number | null
+          times_used: number
+          updated_at: string
+          valid_from: string
+          valid_until: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          discount_type: string
+          discount_value: number
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          min_order_amount?: number | null
+          times_used?: number
+          updated_at?: string
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          min_order_amount?: number | null
+          times_used?: number
+          updated_at?: string
+          valid_from?: string
+          valid_until?: string | null
         }
         Relationships: []
       }

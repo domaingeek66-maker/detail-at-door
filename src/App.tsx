@@ -22,6 +22,7 @@ import AdminBlogPosts from "./pages/admin/AdminBlogPosts";
 import AdminPortfolio from "./pages/admin/AdminPortfolio";
 import AdminServices from "./pages/admin/AdminServices";
 import AdminBroadcast from "./pages/admin/AdminBroadcast";
+import AdminDiscounts from "./pages/admin/AdminDiscounts";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 
@@ -53,6 +54,7 @@ const App = () => (
             <Route path="about" element={<AdminAbout />} />
             <Route path="contact" element={<AdminContact />} />
             <Route path="broadcast" element={<AdminBroadcast />} />
+            <Route path="discounts" element={<AdminDiscounts />} />
             <Route path="settings" element={<AdminSettings />} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
