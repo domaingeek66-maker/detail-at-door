@@ -52,24 +52,41 @@ serve(async (req) => {
     const radiusKm = parseFloat(settingsMap.service_area_radius_km || "25");
     const costPerKm = parseFloat(settingsMap.travel_cost_per_km || "0.50");
 
-    // Geocode customer address using Nominatim (OpenStreetMap)
-    const address = `${street_address}, ${postal_code} ${city}, Belgium`;
-    const geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`;
-    
-    const geocodeResponse = await fetch(geocodeUrl, {
-      headers: {
-        "User-Agent": "CarDetailExclusief/1.0",
-      },
-    });
+    // Try to geocode customer address - try multiple country formats
+    const addressVariants = [
+      `${street_address}, ${postal_code} ${city}, Netherlands`,
+      `${street_address}, ${postal_code} ${city}, Belgium`,
+      `${street_address}, ${postal_code.replace(/\s/g, '')} ${city}, Netherlands`,
+      `${street_address}, ${postal_code.replace(/\s/g, '')} ${city}, Belgium`,
+      `${street_address}, ${city}, Netherlands`,
+      `${street_address}, ${city}, Belgium`,
+    ];
 
-    if (!geocodeResponse.ok) {
-      throw new Error("Geocoding failed");
+    let geocodeData = null;
+    let foundAddress = null;
+
+    for (const address of addressVariants) {
+      const geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1&countrycodes=nl,be`;
+      
+      const geocodeResponse = await fetch(geocodeUrl, {
+        headers: {
+          "User-Agent": "CarDetailExclusief/1.0",
+        },
+      });
+
+      if (!geocodeResponse.ok) continue;
+
+      const data = await geocodeResponse.json();
+      if (data && data.length > 0) {
+        geocodeData = data;
+        foundAddress = address;
+        console.log(`Found address with variant: ${address}`);
+        break;
+      }
     }
 
-    const geocodeData = await geocodeResponse.json();
-
     if (!geocodeData || geocodeData.length === 0) {
-      throw new Error("Address not found");
+      throw new Error("Address not found - please check street, postal code and city");
     }
 
     const customerLat = parseFloat(geocodeData[0].lat);
