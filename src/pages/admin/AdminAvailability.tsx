@@ -150,51 +150,51 @@ export default function AdminAvailability() {
       </div>
 
       {isMobile ? (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {availability.map((av) => (
-            <Card key={av.day_of_week}>
-              <CardContent className="p-4">
-                <div className="space-y-4">
+            <Card key={av.day_of_week} className={!av.is_active ? "opacity-60" : ""}>
+              <CardContent className="p-3">
+                <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-lg">{DAYS[av.day_of_week]}</h3>
+                    <h3 className="font-medium">{DAYS[av.day_of_week]}</h3>
                     <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">
+                        {av.is_active ? "Open" : "Gesloten"}
+                      </span>
                       <Switch
                         checked={av.is_active}
                         onCheckedChange={(checked) => handleActiveChange(av.day_of_week, checked)}
                       />
-                      <span className="text-sm text-muted-foreground">
-                        {av.is_active ? "Open" : "Gesloten"}
-                      </span>
                     </div>
                   </div>
 
                   {av.is_active && (
-                    <div className="space-y-3 pt-3 border-t border-border">
-                      <div className="space-y-2">
-                        <Label htmlFor={`start-${av.day_of_week}`} className="text-sm font-medium flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          Starttijd
+                    <div className="flex items-center gap-3 pt-2 border-t border-border">
+                      <div className="flex-1">
+                        <Label htmlFor={`start-${av.day_of_week}`} className="text-xs text-muted-foreground">
+                          Van
                         </Label>
                         <Input
                           id={`start-${av.day_of_week}`}
                           type="time"
                           value={av.start_time.substring(0, 5)}
                           onChange={(e) => handleTimeChange(av.day_of_week, "start_time", e.target.value)}
-                          className="w-full"
+                          className="mt-1 h-9 text-sm"
                         />
                       </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor={`end-${av.day_of_week}`} className="text-sm font-medium flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          Eindtijd
+                      <Clock className="h-4 w-4 text-muted-foreground mt-5" />
+
+                      <div className="flex-1">
+                        <Label htmlFor={`end-${av.day_of_week}`} className="text-xs text-muted-foreground">
+                          Tot
                         </Label>
                         <Input
                           id={`end-${av.day_of_week}`}
                           type="time"
                           value={av.end_time.substring(0, 5)}
                           onChange={(e) => handleTimeChange(av.day_of_week, "end_time", e.target.value)}
-                          className="w-full"
+                          className="mt-1 h-9 text-sm"
                         />
                       </div>
                     </div>
@@ -204,14 +204,17 @@ export default function AdminAvailability() {
             </Card>
           ))}
 
-          <Button 
-            onClick={saveAvailability} 
-            disabled={saving}
-            className="w-full"
-          >
-            <Save className="mr-2 h-4 w-4" />
-            {saving ? "Opslaan..." : "Beschikbaarheid Opslaan"}
-          </Button>
+          <div className="sticky bottom-4 pt-4">
+            <Button 
+              onClick={saveAvailability} 
+              disabled={saving}
+              className="w-full shadow-lg"
+              size="lg"
+            >
+              <Save className="mr-2 h-4 w-4" />
+              {saving ? "Opslaan..." : "Beschikbaarheid Opslaan"}
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="bg-card border border-border rounded-xl p-6 space-y-6">
