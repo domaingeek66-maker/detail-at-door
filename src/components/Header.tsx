@@ -20,6 +20,9 @@ export const Header = () => {
             <Link to="/diensten" className="hover:text-primary transition-smooth">
               Diensten
             </Link>
+            <Link to="/blog" className="hover:text-primary transition-smooth">
+              Blog
+            </Link>
             <Link to="/over-ons" className="hover:text-primary transition-smooth">
               Over Ons
             </Link>

@@ -18,6 +18,9 @@ import AdminSettings from "./pages/admin/AdminSettings";
 import AdminAvailability from "./pages/admin/AdminAvailability";
 import AdminAbout from "./pages/admin/AdminAbout";
 import AdminContact from "./pages/admin/AdminContact";
+import AdminBlogPosts from "./pages/admin/AdminBlogPosts";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 
 const queryClient = new QueryClient();
 
@@ -33,12 +36,15 @@ const App = () => (
           <Route path="/diensten" element={<Services />} />
           <Route path="/over-ons" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/boeking" element={<Booking />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="customers" element={<AdminCustomers />} />
             <Route path="availability" element={<AdminAvailability />} />
+            <Route path="blog-posts" element={<AdminBlogPosts />} />
             <Route path="about" element={<AdminAbout />} />
             <Route path="contact" element={<AdminContact />} />
             <Route path="settings" element={<AdminSettings />} />

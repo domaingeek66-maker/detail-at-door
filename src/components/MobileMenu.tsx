@@ -45,6 +45,13 @@ export const MobileMenu = () => {
             Diensten
           </Link>
           <Link
+            to="/blog"
+            onClick={closeMenu}
+            className="text-xl font-semibold hover:text-primary transition-smooth py-2"
+          >
+            Blog
+          </Link>
+          <Link
             to="/over-ons"
             onClick={closeMenu}
             className="text-xl font-semibold hover:text-primary transition-smooth py-2"
