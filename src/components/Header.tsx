@@ -33,6 +33,9 @@ export const Header = () => {
                 Plan Afspraak
               </Button>
             </Link>
+            <Link to="/admin/login" className="text-sm text-muted-foreground hover:text-primary transition-smooth">
+              Admin
+            </Link>
           </div>
         </div>
       </div>
