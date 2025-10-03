@@ -21,12 +21,8 @@ export const MobileMenu = () => {
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <div 
-            className="absolute inset-0 bg-background/95 backdrop-blur-lg"
-            onClick={closeMenu}
-          />
-          <nav className="relative h-full flex flex-col p-6 pt-20">
+        <div className="fixed inset-0 z-50 md:hidden bg-background">
+          <nav className="relative h-full flex flex-col p-6 pt-20 bg-background">
             <div className="flex flex-col gap-6">
               <Link
                 to="/"
