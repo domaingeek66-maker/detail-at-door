@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut, Calendar, Users, Settings } from "lucide-react";
+import { LogOut, Calendar, Users, Settings, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function AdminLayout() {
@@ -92,6 +92,15 @@ export default function AdminLayout() {
               >
                 <Users className="mr-2 h-4 w-4" />
                 Klanten
+              </Button>
+            </Link>
+            <Link to="/admin/availability">
+              <Button
+                variant={isActive("/admin/availability") ? "default" : "ghost"}
+                className="w-full justify-start"
+              >
+                <Clock className="mr-2 h-4 w-4" />
+                Beschikbaarheid
               </Button>
             </Link>
             <Link to="/admin/settings">
