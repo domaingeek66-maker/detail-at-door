@@ -109,47 +109,6 @@ Zorg voor natuurlijke zoekwoorden zoals: auto detailing, carwash, poetsen, waxen
 
     const blogPost = JSON.parse(toolCall.function.arguments);
 
-    // Generate image for the blog post
-    console.log("Generating image for:", blogPost.title);
-    const imagePrompt = `Create a professional, high-quality image for a car detailing blog post titled: "${blogPost.title}". 
-The image should feature a luxury car being detailed, polished, or showcased. 
-Style: Modern, clean, professional. 
-Focus on automotive excellence and premium car care.`;
-
-    const imageResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image-preview",
-        messages: [
-          {
-            role: "user",
-            content: imagePrompt
-          }
-        ],
-        modalities: ["image", "text"]
-      }),
-    });
-
-    if (!imageResponse.ok) {
-      console.error("Image generation failed:", imageResponse.status);
-      // Continue without image if generation fails
-      return new Response(JSON.stringify(blogPost), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const imageData = await imageResponse.json();
-    const generatedImage = imageData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-    
-    if (generatedImage) {
-      blogPost.image_url = generatedImage;
-      console.log("Image generated successfully");
-    }
-
     return new Response(JSON.stringify(blogPost), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
