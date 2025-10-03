@@ -17,9 +17,10 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Use service role key to bypass RLS and access all appointments
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     );
 
     const { date, serviceIds } = await req.json();
@@ -86,19 +87,36 @@ Deno.serve(async (req) => {
     // Calculate occupied time ranges
     const occupiedRanges: { start: number; end: number }[] = [];
     
+    console.log('Processing appointments:', appointments?.length || 0);
+    
     for (const apt of appointments || []) {
-      // Get duration of existing appointment
-      const { data: aptServices } = await supabaseClient
-        .from('services')
-        .select('duration_min')
-        .in('id', apt.service_ids);
-      
-      const aptDuration = aptServices?.reduce((sum, s) => sum + s.duration_min, 0) || 0;
-      const [hours, minutes] = apt.appointment_time.split(':').map(Number);
-      const startMinutes = hours * 60 + minutes;
-      const endMinutes = startMinutes + aptDuration;
-      
-      occupiedRanges.push({ start: startMinutes, end: endMinutes });
+      try {
+        // Get duration of existing appointment
+        const { data: aptServices, error: servicesError } = await supabaseClient
+          .from('services')
+          .select('duration_min')
+          .in('id', apt.service_ids);
+        
+        if (servicesError) {
+          console.error('Error fetching appointment services:', servicesError);
+          continue;
+        }
+        
+        if (!aptServices || aptServices.length === 0) {
+          console.warn('No services found for appointment:', apt.service_ids);
+          continue;
+        }
+        
+        const aptDuration = aptServices.reduce((sum, s) => sum + s.duration_min, 0);
+        const [hours, minutes] = apt.appointment_time.split(':').map(Number);
+        const startMinutes = hours * 60 + minutes;
+        const endMinutes = startMinutes + aptDuration;
+        
+        console.log(`Appointment at ${apt.appointment_time}: ${startMinutes}-${endMinutes} (${aptDuration}min)`);
+        occupiedRanges.push({ start: startMinutes, end: endMinutes });
+      } catch (error) {
+        console.error('Error processing appointment:', error);
+      }
     }
 
     console.log('Occupied ranges:', occupiedRanges);
