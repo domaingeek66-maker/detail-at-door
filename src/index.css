@@ -219,7 +219,6 @@ All colors MUST be HSL.
   
   /* Hide dialog background and overlays */
   [data-radix-dialog-overlay],
-  [role="dialog"],
   .fixed.inset-0 {
     display: none !important;
   }

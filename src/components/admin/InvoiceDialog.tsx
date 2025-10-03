@@ -59,10 +59,49 @@ export function InvoiceDialog({ open, onOpenChange, appointment }: InvoiceDialog
   const totalWithBtw = total + btw;
 
   const handlePrint = () => {
-    // Small delay to ensure the dialog is fully rendered
+    const invoiceEl = document.getElementById("invoice");
+    if (!invoiceEl) return;
+
+    const printWindow = window.open("", "_blank", "width=900,height=1200");
+    if (!printWindow) return;
+
+    const styles = `
+      <!doctype html>
+      <html lang="nl">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Factuur</title>
+        <style>
+          @page { size: A4; margin: 1.5cm; }
+          html, body { background: #ffffff; color: #000000; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+          .invoice-wrapper { padding: 0; }
+          h1, h2, h3 { margin: 0 0 8px; }
+          table { width: 100%; border-collapse: collapse; }
+          thead { border-bottom: 2px solid #d1d5db; }
+          tbody tr { border-bottom: 1px solid #e5e7eb; }
+          th, td { padding: 8px 0; text-align: left; font-size: 12px; }
+          .totals { width: 100%; display: flex; justify-content: end; margin-top: 16px; }
+          .totals-inner { width: 256px; }
+          .totals-inner div { display: flex; justify-content: space-between; padding: 6px 0; }
+          .totals-inner .grand { border-top: 2px solid #d1d5db; font-weight: 700; font-size: 16px; }
+          .muted { color: #6b7280; }
+          .section { margin-bottom: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="invoice-wrapper">`;
+
+    const html = styles + invoiceEl.outerHTML + "</div></body></html>";
+
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
     setTimeout(() => {
-      window.print();
-    }, 100);
+      printWindow.print();
+      printWindow.close();
+    }, 300);
   };
 
   return (
