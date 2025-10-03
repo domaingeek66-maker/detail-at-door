@@ -239,28 +239,28 @@ const Booking = () => {
       <main className="pt-24 pb-20">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <h1 className="text-5xl md:text-6xl font-bold mb-4">
+            <div className="text-center mb-12 sm:mb-16">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 sm:mb-6">
                 Plan Uw <span className="text-primary">Afspraak</span>
               </h1>
-              <p className="text-xl text-muted-foreground">
+              <p className="text-lg sm:text-xl text-muted-foreground px-4">
                 In enkele stappen naar een perfect gereinigde auto
               </p>
             </div>
 
             {/* Progress Steps */}
-            <div className="flex justify-center mb-12">
-              <div className="flex items-center gap-4">
+            <div className="flex justify-center mb-8 sm:mb-12 overflow-x-auto pb-2">
+              <div className="flex items-center gap-2 sm:gap-4 min-w-max px-4">
                 {[1, 2, 3, 4].map((s) => (
-                  <div key={s} className="flex items-center gap-4">
+                  <div key={s} className="flex items-center gap-2 sm:gap-4">
                     <div 
-                      className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-smooth ${
+                      className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-semibold text-sm sm:text-base transition-smooth ${
                         step >= s ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
                       }`}
                     >
                       {s}
                     </div>
-                    {s < 4 && <div className={`w-12 h-1 ${step > s ? 'bg-primary' : 'bg-muted'}`} />}
+                    {s < 4 && <div className={`w-8 sm:w-12 h-1 ${step > s ? 'bg-primary' : 'bg-muted'}`} />}
                   </div>
                 ))}
               </div>
@@ -270,8 +270,8 @@ const Booking = () => {
             {step === 1 && (
               <Card className="gradient-card border-border">
                 <CardHeader>
-                  <CardTitle className="text-2xl">Kies Uw Diensten</CardTitle>
-                  <CardDescription>Selecteer één of meerdere diensten</CardDescription>
+                  <CardTitle className="text-xl sm:text-2xl">Kies Uw Diensten</CardTitle>
+                  <CardDescription className="text-sm sm:text-base">Selecteer één of meerdere diensten</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {services?.map((service) => (
@@ -285,11 +285,11 @@ const Booking = () => {
                         className="mt-1"
                       />
                       <div className="flex-1">
-                        <h3 className="font-semibold text-lg">{service.name}</h3>
-                        <p className="text-muted-foreground text-sm">{service.description}</p>
+                        <h3 className="font-semibold text-base sm:text-lg">{service.name}</h3>
+                        <p className="text-muted-foreground text-xs sm:text-sm">{service.description}</p>
                         <div className="flex items-center gap-4 mt-2">
-                          <span className="text-primary font-bold">€{service.price},-</span>
-                          <span className="text-sm text-muted-foreground">{service.duration_min} min</span>
+                          <span className="text-primary font-bold text-sm sm:text-base">€{service.price},-</span>
+                          <span className="text-xs sm:text-sm text-muted-foreground">{service.duration_min} min</span>
                         </div>
                       </div>
                     </div>
@@ -313,15 +313,17 @@ const Booking = () => {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div>
-                    <Label className="text-lg mb-4 block">Datum</Label>
-                    <Calendar
-                      mode="single"
-                      selected={selectedDate}
-                      onSelect={handleDateSelect}
-                      disabled={isDateDisabled}
-                      locale={nl}
-                      className="rounded-md border border-border p-3"
-                    />
+                    <Label className="text-base sm:text-lg mb-4 block">Datum</Label>
+                    <div className="flex justify-center">
+                      <Calendar
+                        mode="single"
+                        selected={selectedDate}
+                        onSelect={handleDateSelect}
+                        disabled={isDateDisabled}
+                        locale={nl}
+                        className="rounded-md border border-border p-2 sm:p-3 scale-90 sm:scale-100 origin-top"
+                      />
+                    </div>
                   </div>
                   
                   {selectedDate && (
@@ -342,14 +344,15 @@ const Booking = () => {
                             <p className="text-sm text-muted-foreground mt-2">Beschikbare tijden laden...</p>
                           </div>
                         ) : timeslots && timeslots.length > 0 ? (
-                          <div className="grid grid-cols-4 gap-2">
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                             {timeslots.map((slot: { time: string; available: boolean }) => (
                               <Button
                                 key={slot.time}
                                 variant={selectedTime === slot.time ? "default" : "outline"}
                                 onClick={() => slot.available && setSelectedTime(slot.time)}
                                 disabled={!slot.available}
-                                className={selectedTime === slot.time ? "gradient-primary" : ""}
+                                size="sm"
+                                className={`${selectedTime === slot.time ? "gradient-primary" : ""} text-xs sm:text-sm`}
                               >
                                 {slot.time}
                               </Button>

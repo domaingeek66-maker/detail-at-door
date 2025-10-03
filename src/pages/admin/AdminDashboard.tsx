@@ -141,15 +141,15 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div>
+    <div className="p-4 sm:p-6">
       <div className="mb-6">
-        <h2 className="text-3xl font-bold">Afspraken Beheer</h2>
-        <p className="text-muted-foreground mt-2">
+        <h2 className="text-2xl sm:text-3xl font-bold">Afspraken Beheer</h2>
+        <p className="text-sm sm:text-base text-muted-foreground mt-2">
           Bekijk en beheer alle afspraken
         </p>
       </div>
 
-      <div className="bg-card border border-border rounded-xl overflow-hidden">
+      <div className="bg-card border border-border rounded-xl overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>

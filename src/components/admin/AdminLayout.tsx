@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut, Calendar, Users, Settings, Clock } from "lucide-react";
+import { LogOut, Calendar, Users, Settings, Clock, Menu, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function AdminLayout() {
   const [loading, setLoading] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -61,21 +62,31 @@ export default function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
+      <header className="border-b border-border bg-card sticky top-0 z-40">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-            Admin Dashboard
-          </h1>
-          <Button variant="ghost" onClick={handleLogout}>
-            <LogOut className="mr-2 h-4 w-4" />
-            Uitloggen
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-2 hover:bg-muted rounded-lg transition-smooth"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+            <h1 className="text-xl sm:text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              Admin Dashboard
+            </h1>
+          </div>
+          <Button variant="ghost" onClick={handleLogout} size="sm" className="text-xs sm:text-sm">
+            <LogOut className="mr-0 sm:mr-2 h-4 w-4" />
+            <span className="hidden sm:inline">Uitloggen</span>
           </Button>
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex gap-8">
-          <nav className="w-64 space-y-2">
+      <div className="container mx-auto px-4 py-4 sm:py-8">
+        <div className="flex gap-4 sm:gap-8">
+          {/* Desktop Sidebar */}
+          <nav className="hidden lg:block w-64 space-y-2 shrink-0">
             <Link to="/admin/dashboard">
               <Button
                 variant={isActive("/admin/dashboard") ? "default" : "ghost"}
@@ -114,7 +125,55 @@ export default function AdminLayout() {
             </Link>
           </nav>
 
-          <main className="flex-1">
+          {/* Mobile Sidebar */}
+          {mobileMenuOpen && (
+            <div className="fixed inset-0 z-30 lg:hidden">
+              <div 
+                className="absolute inset-0 bg-background/95 backdrop-blur-lg"
+                onClick={() => setMobileMenuOpen(false)}
+              />
+              <nav className="relative bg-card border-r border-border w-64 h-full p-4 space-y-2">
+                <Link to="/admin/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                  <Button
+                    variant={isActive("/admin/dashboard") ? "default" : "ghost"}
+                    className="w-full justify-start"
+                  >
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Afspraken
+                  </Button>
+                </Link>
+                <Link to="/admin/customers" onClick={() => setMobileMenuOpen(false)}>
+                  <Button
+                    variant={isActive("/admin/customers") ? "default" : "ghost"}
+                    className="w-full justify-start"
+                  >
+                    <Users className="mr-2 h-4 w-4" />
+                    Klanten
+                  </Button>
+                </Link>
+                <Link to="/admin/availability" onClick={() => setMobileMenuOpen(false)}>
+                  <Button
+                    variant={isActive("/admin/availability") ? "default" : "ghost"}
+                    className="w-full justify-start"
+                  >
+                    <Clock className="mr-2 h-4 w-4" />
+                    Beschikbaarheid
+                  </Button>
+                </Link>
+                <Link to="/admin/settings" onClick={() => setMobileMenuOpen(false)}>
+                  <Button
+                    variant={isActive("/admin/settings") ? "default" : "ghost"}
+                    className="w-full justify-start"
+                  >
+                    <Settings className="mr-2 h-4 w-4" />
+                    Instellingen
+                  </Button>
+                </Link>
+              </nav>
+            </div>
+          )}
+
+          <main className="flex-1 min-w-0">
             <Outlet />
           </main>
         </div>

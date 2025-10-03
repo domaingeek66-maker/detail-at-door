@@ -110,10 +110,47 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  html {
+    scroll-behavior: smooth;
   }
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold;
+  }
+
+  /* Better touch targets for mobile */
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Improve tap highlighting */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Optimize images for mobile */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Prevent text overflow on mobile */
+  * {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* Fix viewport on mobile devices */
+  @supports (-webkit-touch-callout: none) {
+    body {
+      /* iOS Safari specific fixes */
+      min-height: -webkit-fill-available;
+    }
   }
 }
 

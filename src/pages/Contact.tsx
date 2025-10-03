@@ -21,7 +21,7 @@ const Contact = () => {
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 mb-12">
               <Card className="gradient-card border-border">
                 <CardHeader>
                   <div className="bg-primary/20 w-12 h-12 rounded-full flex items-center justify-center mb-4">

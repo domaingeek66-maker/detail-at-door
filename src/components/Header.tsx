@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Car } from "lucide-react";
+import { MobileMenu } from "./MobileMenu";
 
 export const Header = () => {
   return (
@@ -8,8 +9,8 @@ export const Header = () => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <Car className="w-8 h-8 text-primary" />
-            <span className="text-xl font-bold">Cardetail Exclusief</span>
+            <Car className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+            <span className="text-lg sm:text-xl font-bold">Cardetail Exclusief</span>
           </Link>
           
           <nav className="hidden md:flex items-center gap-8">
@@ -27,7 +28,7 @@ export const Header = () => {
             </Link>
           </nav>
           
-          <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-4">
             <Link to="/boeking">
               <Button className="gradient-primary shadow-glow">
                 Plan Afspraak
@@ -37,6 +38,8 @@ export const Header = () => {
               Admin
             </Link>
           </div>
+
+          <MobileMenu />
         </div>
       </div>
     </header>

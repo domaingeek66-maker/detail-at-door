@@ -30,7 +30,7 @@ const About = () => {
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="gradient-card p-6 rounded-lg border border-border">
                   <div className="bg-primary/20 w-12 h-12 rounded-full flex items-center justify-center mb-4">
                     <Award className="w-6 h-6 text-primary" />
