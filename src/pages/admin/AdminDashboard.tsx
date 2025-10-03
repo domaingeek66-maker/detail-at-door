@@ -18,11 +18,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { format, startOfWeek, startOfMonth, startOfYear, isAfter } from "date-fns";
 import { nl } from "date-fns/locale";
-import { Trash2, FileText, Calendar as CalendarIcon, Clock, User, Car, Search, Euro, Users, CheckCircle2 } from "lucide-react";
+import { Trash2, FileText, Calendar as CalendarIcon, Clock, User, Car, Search, Euro, Users, CheckCircle2, AlertTriangle } from "lucide-react";
 import { InvoiceDialog } from "@/components/admin/InvoiceDialog";
 import { Input } from "@/components/ui/input";
 
@@ -245,17 +256,94 @@ export default function AdminDashboard() {
     ).length;
   };
 
+  const handleResetData = async () => {
+    try {
+      // Delete all appointments
+      const { error: appointmentsError } = await supabase
+        .from("appointments")
+        .delete()
+        .neq("id", "00000000-0000-0000-0000-000000000000");
+
+      if (appointmentsError) throw appointmentsError;
+
+      // Delete all customers
+      const { error: customersError } = await supabase
+        .from("customers")
+        .delete()
+        .neq("id", "00000000-0000-0000-0000-000000000000");
+
+      if (customersError) throw customersError;
+
+      toast({
+        title: "Data gereset",
+        description: "Alle afspraken en klanten zijn verwijderd",
+      });
+
+      // Refresh data
+      fetchAppointments();
+      fetchCustomersCount();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Fout bij resetten",
+        description: error.message,
+      });
+    }
+  };
+
   if (loading) {
     return <div>Laden...</div>;
   }
 
   return (
     <div className="p-4 sm:p-6">
-      <div className="mb-6">
-        <h2 className="text-2xl sm:text-3xl font-bold">Dashboard</h2>
-        <p className="text-sm sm:text-base text-muted-foreground mt-2">
-          Overzicht van je bedrijf
-        </p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h2 className="text-2xl sm:text-3xl font-bold">Dashboard</h2>
+          <p className="text-sm sm:text-base text-muted-foreground mt-2">
+            Overzicht van je bedrijf
+          </p>
+        </div>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" size="sm">
+              <AlertTriangle className="h-4 w-4 mr-2" />
+              Reset Data
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+                Weet je het zeker?
+              </AlertDialogTitle>
+              <AlertDialogDescription className="space-y-2">
+                <p className="font-semibold text-foreground">
+                  Deze actie kan NIET ongedaan worden gemaakt!
+                </p>
+                <p>
+                  Alle volgende data wordt permanent verwijderd:
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li>Alle afspraken</li>
+                  <li>Alle klantgegevens</li>
+                </ul>
+                <p className="text-destructive font-medium mt-4">
+                  Ben je absoluut zeker dat je door wilt gaan?
+                </p>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Nee, annuleren</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleResetData}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Ja, alles verwijderen
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       <div className="mb-6">
