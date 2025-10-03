@@ -59,7 +59,10 @@ export function InvoiceDialog({ open, onOpenChange, appointment }: InvoiceDialog
   const totalWithBtw = total + btw;
 
   const handlePrint = () => {
-    window.print();
+    // Small delay to ensure the dialog is fully rendered
+    setTimeout(() => {
+      window.print();
+    }, 100);
   };
 
   return (
@@ -82,7 +85,7 @@ export function InvoiceDialog({ open, onOpenChange, appointment }: InvoiceDialog
           </div>
         </DialogHeader>
 
-        <div className="invoice-content p-4 sm:p-8 bg-white text-black print:p-12" id="invoice">
+        <div className="invoice-content p-4 sm:p-8 print:p-12" id="invoice" style={{ backgroundColor: 'white', color: 'black' }}>
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between mb-6 sm:mb-8 gap-4">
             <div>
