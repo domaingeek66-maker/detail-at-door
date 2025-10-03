@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Sparkles } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -34,6 +34,7 @@ const AdminBlogPosts = () => {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
@@ -135,6 +136,48 @@ const AdminBlogPosts = () => {
       .replace(/^-|-$/g, "");
   };
 
+  const generateAIBlogPosts = async () => {
+    setIsGenerating(true);
+    const topics = [
+      "De complete gids voor auto detailing: Wat je moet weten",
+      "Ceramic coating vs wax: Wat is de beste bescherming voor jouw auto?",
+      "5 Tips om je auto showroom-clean te houden"
+    ];
+
+    try {
+      for (const topic of topics) {
+        const { data, error } = await supabase.functions.invoke("generate-blog-post", {
+          body: { topic }
+        });
+
+        if (error) throw error;
+
+        await supabase.from("blog_posts").insert({
+          title: data.title,
+          slug: generateSlug(data.title),
+          excerpt: data.excerpt,
+          content: data.content,
+          author: "Admin",
+          published: true
+        });
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["admin-blog-posts"] });
+      toast({ 
+        title: "3 blogposts gegenereerd!", 
+        description: "De AI heeft 3 SEO-geoptimaliseerde posts aangemaakt."
+      });
+    } catch (error: any) {
+      toast({
+        title: "Fout bij genereren",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -150,16 +193,29 @@ const AdminBlogPosts = () => {
           <h1 className="text-3xl font-bold">Blog Posts</h1>
           <p className="text-muted-foreground">Beheer je blog artikelen</p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={(open) => {
-          setIsDialogOpen(open);
-          if (!open) resetForm();
-        }}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Nieuwe Post
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <Button 
+            variant="outline"
+            onClick={generateAIBlogPosts} 
+            disabled={isGenerating}
+          >
+            {isGenerating ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4 mr-2" />
+            )}
+            Genereer 3 Posts
+          </Button>
+          <Dialog open={isDialogOpen} onOpenChange={(open) => {
+            setIsDialogOpen(open);
+            if (!open) resetForm();
+          }}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Nieuwe Post
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
@@ -251,6 +307,7 @@ const AdminBlogPosts = () => {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <div className="grid gap-4">
