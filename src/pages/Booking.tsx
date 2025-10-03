@@ -495,7 +495,7 @@ const Booking = () => {
                             id="postalCode"
                             value={formData.postalCode || ''}
                             onChange={(e) => setFormData({...formData, postalCode: e.target.value})}
-                            placeholder="1000"
+                            placeholder="6002 XK"
                           />
                           {errors.postalCode && <p className="text-sm text-destructive mt-1">{errors.postalCode}</p>}
                         </div>
@@ -505,7 +505,7 @@ const Booking = () => {
                             id="city"
                             value={formData.city || ''}
                             onChange={(e) => setFormData({...formData, city: e.target.value})}
-                            placeholder="Brussel"
+                            placeholder="Weert"
                           />
                           {errors.city && <p className="text-sm text-destructive mt-1">{errors.city}</p>}
                         </div>
