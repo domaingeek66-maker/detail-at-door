@@ -1,66 +1,72 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 export const MobileMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const toggleMenu = () => setIsOpen(!isOpen);
-
   const closeMenu = () => setIsOpen(false);
 
   return (
-    <>
-      <button
-        onClick={toggleMenu}
-        className="md:hidden p-2 hover:bg-muted rounded-lg transition-smooth"
-        aria-label="Toggle menu"
-      >
-        {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-      </button>
-
-      {isOpen && (
-        <div className="fixed inset-0 z-50 md:hidden bg-background">
-          <nav className="relative h-full flex flex-col p-6 pt-20 bg-background">
-            <div className="flex flex-col gap-6">
-              <Link
-                to="/"
-                onClick={closeMenu}
-                className="text-2xl font-semibold hover:text-primary transition-smooth"
-              >
-                Home
-              </Link>
-              <Link
-                to="/diensten"
-                onClick={closeMenu}
-                className="text-2xl font-semibold hover:text-primary transition-smooth"
-              >
-                Diensten
-              </Link>
-              <Link
-                to="/over-ons"
-                onClick={closeMenu}
-                className="text-2xl font-semibold hover:text-primary transition-smooth"
-              >
-                Over Ons
-              </Link>
-              <Link
-                to="/contact"
-                onClick={closeMenu}
-                className="text-2xl font-semibold hover:text-primary transition-smooth"
-              >
-                Contact
-              </Link>
-              <Link to="/boeking" onClick={closeMenu} className="mt-4">
-                <Button className="w-full gradient-primary shadow-glow" size="lg">
-                  Plan Afspraak
-                </Button>
-              </Link>
-            </div>
-          </nav>
-        </div>
-      )}
-    </>
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <SheetTrigger asChild className="md:hidden">
+        <button
+          className="p-2 hover:bg-muted rounded-lg transition-smooth"
+          aria-label="Toggle menu"
+        >
+          <Menu className="w-6 h-6" />
+        </button>
+      </SheetTrigger>
+      <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+        <SheetHeader>
+          <SheetTitle className="text-left">Menu</SheetTitle>
+        </SheetHeader>
+        <nav className="flex flex-col gap-6 mt-8">
+          <Link
+            to="/"
+            onClick={closeMenu}
+            className="text-xl font-semibold hover:text-primary transition-smooth py-2"
+          >
+            Home
+          </Link>
+          <Link
+            to="/diensten"
+            onClick={closeMenu}
+            className="text-xl font-semibold hover:text-primary transition-smooth py-2"
+          >
+            Diensten
+          </Link>
+          <Link
+            to="/over-ons"
+            onClick={closeMenu}
+            className="text-xl font-semibold hover:text-primary transition-smooth py-2"
+          >
+            Over Ons
+          </Link>
+          <Link
+            to="/contact"
+            onClick={closeMenu}
+            className="text-xl font-semibold hover:text-primary transition-smooth py-2"
+          >
+            Contact
+          </Link>
+          <div className="pt-4 border-t border-border">
+            <Link to="/boeking" onClick={closeMenu}>
+              <Button className="w-full gradient-primary shadow-glow" size="lg">
+                Plan Afspraak
+              </Button>
+            </Link>
+          </div>
+        </nav>
+      </SheetContent>
+    </Sheet>
   );
 };
