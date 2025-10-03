@@ -29,7 +29,7 @@ export const PortfolioSection = () => {
             onClick={() => window.open('https://www.instagram.com/cardetail.exclusief', '_blank')}
           >
             <Instagram className="w-5 h-5" />
-            Volg ons op Instagram
+            @cardetail.exclusief
           </Button>
         </div>
 
