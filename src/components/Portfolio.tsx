@@ -27,7 +27,7 @@ const Portfolio = () => {
   return (
     <section className="py-20 bg-gradient-to-b from-background to-muted/20">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
+        <div className="text-center mb-12 animate-fade-in">
           <h2 className="text-4xl font-bold mb-4 text-foreground">
             Ons Werk
           </h2>
@@ -40,7 +40,8 @@ const Portfolio = () => {
           {portfolioItems.map((item) => (
             <div
               key={item.id}
-              className="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
+              className="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 animate-scale-in"
+              style={{ animationDelay: `${item.id * 0.1}s` }}
             >
               <div className="aspect-[4/5] overflow-hidden">
                 <img

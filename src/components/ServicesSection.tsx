@@ -33,7 +33,7 @@ export const ServicesSection = () => {
   return (
     <section className="py-12 sm:py-16 md:py-20 px-4">
       <div className="container mx-auto">
-        <div className="text-center mb-8 sm:mb-12">
+        <div className="text-center mb-8 sm:mb-12 animate-fade-in">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
             Onze <span className="text-primary">Diensten</span>
           </h2>
@@ -46,7 +46,8 @@ export const ServicesSection = () => {
           {services.map((service, index) => (
             <Card 
               key={index}
-              className="overflow-hidden group hover:shadow-glow transition-smooth gradient-card border-border"
+              className="overflow-hidden group hover:shadow-glow transition-smooth gradient-card border-border animate-fade-in-up"
+              style={{ animationDelay: `${index * 0.15}s` }}
             >
               <div className="relative h-48 overflow-hidden">
                 <img 
