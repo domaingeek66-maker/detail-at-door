@@ -33,7 +33,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { format, startOfWeek, startOfMonth, startOfYear, isAfter } from "date-fns";
 import { nl } from "date-fns/locale";
-import { Trash2, FileText, Calendar as CalendarIcon, Clock, User, Car, Search, Euro, Users, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Trash2, FileText, Calendar as CalendarIcon, Clock, User, Car, Search, Euro, Users, CheckCircle2, AlertTriangle, Download } from "lucide-react";
 import { InvoiceDialog } from "@/components/admin/InvoiceDialog";
 import { Input } from "@/components/ui/input";
 
@@ -291,26 +291,135 @@ export default function AdminDashboard() {
     }
   };
 
+  const exportToCSV = () => {
+    try {
+      // Prepare CSV headers
+      const headers = [
+        "Datum",
+        "Tijd",
+        "Status",
+        "Klant Naam",
+        "Email",
+        "Telefoon",
+        "Adres",
+        "Postcode",
+        "Plaats",
+        "Voertuig Merk",
+        "Voertuig Model",
+        "Diensten",
+        "Diensten Prijs (€)",
+        "Reiskosten (€)",
+        "Afstand (km)",
+        "Totaal Prijs (€)",
+        "Opmerkingen"
+      ];
+
+      // Prepare CSV rows
+      const rows = filteredAppointments.map(appointment => {
+        const serviceNames = appointment.service_ids
+          .map(serviceId => {
+            const service = services.find(s => s.id === serviceId);
+            return service ? `Service ${serviceId.substring(0, 8)}` : serviceId;
+          })
+          .join("; ");
+
+        const servicesTotal = appointment.service_ids.reduce((sum, serviceId) => {
+          const service = services.find(s => s.id === serviceId);
+          return sum + (service?.price || 0);
+        }, 0);
+
+        const totalPrice = servicesTotal + (appointment.travel_cost || 0);
+
+        return [
+          format(new Date(appointment.appointment_date), 'dd-MM-yyyy', { locale: nl }),
+          appointment.appointment_time.substring(0, 5),
+          appointment.status === "pending" ? "In afwachting" :
+          appointment.status === "confirmed" ? "Bevestigd" :
+          appointment.status === "completed" ? "Voltooid" :
+          appointment.status === "cancelled" ? "Geannuleerd" : appointment.status,
+          appointment.customers.name,
+          appointment.customers.email,
+          appointment.customers.phone,
+          appointment.street_address || "",
+          appointment.postal_code || "",
+          appointment.city || "",
+          appointment.vehicle_make,
+          appointment.vehicle_model,
+          serviceNames,
+          servicesTotal.toFixed(2),
+          (appointment.travel_cost || 0).toFixed(2),
+          (appointment.distance_km || 0).toFixed(1),
+          totalPrice.toFixed(2),
+          appointment.notes || ""
+        ];
+      });
+
+      // Convert to CSV string
+      const csvContent = [
+        headers.join(","),
+        ...rows.map(row => row.map(cell => {
+          // Escape commas and quotes in cell content
+          const cellStr = String(cell);
+          if (cellStr.includes(",") || cellStr.includes('"') || cellStr.includes("\n")) {
+            return `"${cellStr.replace(/"/g, '""')}"`;
+          }
+          return cellStr;
+        }).join(","))
+      ].join("\n");
+
+      // Add BOM for UTF-8 encoding (helps Excel recognize UTF-8)
+      const BOM = "\uFEFF";
+      const blob = new Blob([BOM + csvContent], { type: "text/csv;charset=utf-8;" });
+      
+      // Create download link
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `afspraken_export_${format(new Date(), 'yyyy-MM-dd_HHmm')}.csv`);
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast({
+        title: "Export succesvol",
+        description: `${filteredAppointments.length} afspraken geëxporteerd naar CSV`,
+      });
+    } catch (error: any) {
+      console.error("Export error:", error);
+      toast({
+        variant: "destructive",
+        title: "Fout bij exporteren",
+        description: error.message || "Kon CSV niet exporteren",
+      });
+    }
+  };
+
   if (loading) {
     return <div>Laden...</div>;
   }
 
   return (
     <div className="p-4 sm:p-6">
-      <div className="mb-6 flex items-start justify-between">
+      <div className="mb-6 flex items-start justify-between flex-wrap gap-4">
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold">Dashboard</h2>
           <p className="text-sm sm:text-base text-muted-foreground mt-2">
             Overzicht van je bedrijf
           </p>
         </div>
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="sm">
-              <AlertTriangle className="h-4 w-4 mr-2" />
-              Reset Data
-            </Button>
-          </AlertDialogTrigger>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={exportToCSV} disabled={filteredAppointments.length === 0}>
+            <Download className="h-4 w-4 mr-2" />
+            Export CSV
+          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm">
+                <AlertTriangle className="h-4 w-4 mr-2" />
+                Reset Data
+              </Button>
+            </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle className="flex items-center gap-2">
@@ -344,6 +453,7 @@ export default function AdminDashboard() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+        </div>
       </div>
 
       <div className="mb-6">
