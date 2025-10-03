@@ -19,12 +19,12 @@ export const Hero = () => {
       
       <div className="container mx-auto px-4 relative z-10 pt-20 pb-10">
         <div className="max-w-4xl mx-auto text-center space-y-6 sm:space-y-8">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold leading-tight animate-fade-in-up">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold leading-tight">
             Exclusieve Car Detailing{" "}
             <span className="text-primary">bij u aan huis</span>
           </h1>
           
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-2xl mx-auto px-4 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-2xl mx-auto px-4">
             Premium car detailing service die naar u toekomt. Professionele behandeling zonder dat u uw huis hoeft te verlaten.
           </p>
           
