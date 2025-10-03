@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Save, Clock } from "lucide-react";
 
 interface Availability {
@@ -22,6 +24,7 @@ export default function AdminAvailability() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     fetchAvailability();
@@ -138,74 +141,140 @@ export default function AdminAvailability() {
   }
 
   return (
-    <div>
+    <div className="p-4 sm:p-6">
       <div className="mb-6">
-        <h2 className="text-3xl font-bold">Beschikbaarheid</h2>
-        <p className="text-muted-foreground mt-2">
+        <h2 className="text-2xl sm:text-3xl font-bold">Beschikbaarheid</h2>
+        <p className="text-sm sm:text-base text-muted-foreground mt-2">
           Stel de openingstijden in per dag van de week
         </p>
       </div>
 
-      <div className="bg-card border border-border rounded-xl p-6 space-y-6">
-        {availability.map((av) => (
-          <div
-            key={av.day_of_week}
-            className="flex items-center gap-4 p-4 rounded-lg border border-border bg-background/50"
+      {isMobile ? (
+        <div className="space-y-4">
+          {availability.map((av) => (
+            <Card key={av.day_of_week}>
+              <CardContent className="p-4">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-lg">{DAYS[av.day_of_week]}</h3>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={av.is_active}
+                        onCheckedChange={(checked) => handleActiveChange(av.day_of_week, checked)}
+                      />
+                      <span className="text-sm text-muted-foreground">
+                        {av.is_active ? "Open" : "Gesloten"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {av.is_active && (
+                    <div className="space-y-3 pt-3 border-t border-border">
+                      <div className="space-y-2">
+                        <Label htmlFor={`start-${av.day_of_week}`} className="text-sm font-medium flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          Starttijd
+                        </Label>
+                        <Input
+                          id={`start-${av.day_of_week}`}
+                          type="time"
+                          value={av.start_time.substring(0, 5)}
+                          onChange={(e) => handleTimeChange(av.day_of_week, "start_time", e.target.value)}
+                          className="w-full"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor={`end-${av.day_of_week}`} className="text-sm font-medium flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          Eindtijd
+                        </Label>
+                        <Input
+                          id={`end-${av.day_of_week}`}
+                          type="time"
+                          value={av.end_time.substring(0, 5)}
+                          onChange={(e) => handleTimeChange(av.day_of_week, "end_time", e.target.value)}
+                          className="w-full"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+
+          <Button 
+            onClick={saveAvailability} 
+            disabled={saving}
+            className="w-full"
           >
-            <div className="w-32 font-medium">{DAYS[av.day_of_week]}</div>
-            
-            <div className="flex items-center gap-2">
-              <Switch
-                checked={av.is_active}
-                onCheckedChange={(checked) => handleActiveChange(av.day_of_week, checked)}
-              />
-              <span className="text-sm text-muted-foreground">
-                {av.is_active ? "Open" : "Gesloten"}
-              </span>
-            </div>
-
-            {av.is_active && (
-              <>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <Label htmlFor={`start-${av.day_of_week}`} className="sr-only">
-                    Start tijd
-                  </Label>
-                  <Input
-                    id={`start-${av.day_of_week}`}
-                    type="time"
-                    value={av.start_time.substring(0, 5)}
-                    onChange={(e) => handleTimeChange(av.day_of_week, "start_time", e.target.value)}
-                    className="w-32"
-                  />
-                </div>
-
-                <span className="text-muted-foreground">tot</span>
-
-                <div className="flex items-center gap-2">
-                  <Label htmlFor={`end-${av.day_of_week}`} className="sr-only">
-                    Eind tijd
-                  </Label>
-                  <Input
-                    id={`end-${av.day_of_week}`}
-                    type="time"
-                    value={av.end_time.substring(0, 5)}
-                    onChange={(e) => handleTimeChange(av.day_of_week, "end_time", e.target.value)}
-                    className="w-32"
-                  />
-                </div>
-              </>
-            )}
-          </div>
-        ))}
-
-        <div className="flex gap-4 pt-4 border-t border-border">
-          <Button onClick={saveAvailability} disabled={saving}>
             <Save className="mr-2 h-4 w-4" />
             {saving ? "Opslaan..." : "Beschikbaarheid Opslaan"}
           </Button>
         </div>
-      </div>
+      ) : (
+        <div className="bg-card border border-border rounded-xl p-6 space-y-6">
+          {availability.map((av) => (
+            <div
+              key={av.day_of_week}
+              className="flex items-center gap-4 p-4 rounded-lg border border-border bg-background/50"
+            >
+              <div className="w-32 font-medium">{DAYS[av.day_of_week]}</div>
+              
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={av.is_active}
+                  onCheckedChange={(checked) => handleActiveChange(av.day_of_week, checked)}
+                />
+                <span className="text-sm text-muted-foreground">
+                  {av.is_active ? "Open" : "Gesloten"}
+                </span>
+              </div>
+
+              {av.is_active && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <Label htmlFor={`start-${av.day_of_week}`} className="sr-only">
+                      Start tijd
+                    </Label>
+                    <Input
+                      id={`start-${av.day_of_week}`}
+                      type="time"
+                      value={av.start_time.substring(0, 5)}
+                      onChange={(e) => handleTimeChange(av.day_of_week, "start_time", e.target.value)}
+                      className="w-32"
+                    />
+                  </div>
+
+                  <span className="text-muted-foreground">tot</span>
+
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor={`end-${av.day_of_week}`} className="sr-only">
+                      Eind tijd
+                    </Label>
+                    <Input
+                      id={`end-${av.day_of_week}`}
+                      type="time"
+                      value={av.end_time.substring(0, 5)}
+                      onChange={(e) => handleTimeChange(av.day_of_week, "end_time", e.target.value)}
+                      className="w-32"
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+
+          <div className="flex gap-4 pt-4 border-t border-border">
+            <Button onClick={saveAvailability} disabled={saving}>
+              <Save className="mr-2 h-4 w-4" />
+              {saving ? "Opslaan..." : "Beschikbaarheid Opslaan"}
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
