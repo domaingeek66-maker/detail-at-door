@@ -34,8 +34,13 @@ Deno.serve(async (req) => {
 
     console.log('Calculating timeslots for:', { date, serviceIds });
 
-    // Get day of week (0 = Sunday, 6 = Saturday)
-    const dayOfWeek = new Date(date).getDay();
+    // Get day of week for the date
+    // Parse date as local date by adding time component to avoid timezone shifts
+    const [year, month, day] = date.split('-').map(Number);
+    const localDate = new Date(year, month - 1, day); // month is 0-indexed
+    const dayOfWeek = localDate.getDay();
+    
+    console.log('Date:', date, 'Day of week:', dayOfWeek);
 
     // Get availability for this day
     const { data: availability, error: availError } = await supabaseClient
