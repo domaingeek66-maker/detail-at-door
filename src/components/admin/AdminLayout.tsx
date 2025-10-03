@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut, Calendar, Users, Settings, Clock, Menu } from "lucide-react";
+import { LogOut, Calendar, Users, Settings, Clock, Menu, FileText, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Sheet,
@@ -113,6 +113,24 @@ export default function AdminLayout() {
                       Beschikbaarheid
                     </Button>
                   </Link>
+                  <Link to="/admin/about" onClick={() => setMobileMenuOpen(false)}>
+                    <Button
+                      variant={isActive("/admin/about") ? "default" : "ghost"}
+                      className="w-full justify-start"
+                    >
+                      <FileText className="mr-2 h-4 w-4" />
+                      Over Ons
+                    </Button>
+                  </Link>
+                  <Link to="/admin/contact" onClick={() => setMobileMenuOpen(false)}>
+                    <Button
+                      variant={isActive("/admin/contact") ? "default" : "ghost"}
+                      className="w-full justify-start"
+                    >
+                      <Phone className="mr-2 h-4 w-4" />
+                      Contact
+                    </Button>
+                  </Link>
                   <Link to="/admin/settings" onClick={() => setMobileMenuOpen(false)}>
                     <Button
                       variant={isActive("/admin/settings") ? "default" : "ghost"}
@@ -165,6 +183,24 @@ export default function AdminLayout() {
               >
                 <Clock className="mr-2 h-4 w-4" />
                 Beschikbaarheid
+              </Button>
+            </Link>
+            <Link to="/admin/about">
+              <Button
+                variant={isActive("/admin/about") ? "default" : "ghost"}
+                className="w-full justify-start"
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                Over Ons
+              </Button>
+            </Link>
+            <Link to="/admin/contact">
+              <Button
+                variant={isActive("/admin/contact") ? "default" : "ghost"}
+                className="w-full justify-start"
+              >
+                <Phone className="mr-2 h-4 w-4" />
+                Contact
               </Button>
             </Link>
             <Link to="/admin/settings">

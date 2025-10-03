@@ -1,10 +1,66 @@
+import { useEffect, useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageCircle, Mail, Phone, MapPin, Clock } from "lucide-react";
+import { MessageCircle, Mail, Phone, MapPin, Clock, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
+interface OpeningHour {
+  day: string;
+  hours: string;
+}
+
+interface ContactContent {
+  whatsapp: string;
+  phone: string;
+  email: string;
+  work_area: string;
+  opening_hours: OpeningHour[];
+}
 
 const Contact = () => {
+  const [loading, setLoading] = useState(true);
+  const [title, setTitle] = useState("Neem Contact Op");
+  const [subtitle, setSubtitle] = useState("Heeft u vragen of wilt u een afspraak maken? We helpen u graag!");
+  const [content, setContent] = useState<ContactContent>({
+    whatsapp: "+31612345678",
+    phone: "+31612345678",
+    email: "info@cardetail-exclusief.nl",
+    work_area: "Landelijk actief",
+    opening_hours: []
+  });
+
+  useEffect(() => {
+    fetchContent();
+  }, []);
+
+  const fetchContent = async () => {
+    const { data } = await supabase
+      .from("page_content")
+      .select("*")
+      .eq("page_key", "contact")
+      .maybeSingle();
+
+    if (data) {
+      setTitle(data.title);
+      setSubtitle(data.subtitle || "");
+      setContent(data.content as unknown as ContactContent);
+    }
+    setLoading(false);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen">
+        <Header />
+        <main className="pt-24 pb-20 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen">
       <Header />
@@ -14,10 +70,10 @@ const Contact = () => {
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-16">
               <h1 className="text-5xl md:text-6xl font-bold mb-6">
-                Neem <span className="text-primary">Contact</span> Op
+                {title.split(" ").slice(0, -1).join(" ")} <span className="text-primary">{title.split(" ").slice(-1)}</span>
               </h1>
               <p className="text-xl text-muted-foreground">
-                Heeft u vragen of wilt u een afspraak maken? We helpen u graag!
+                {subtitle}
               </p>
             </div>
 
@@ -33,7 +89,7 @@ const Contact = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <a href="https://wa.me/31612345678" target="_blank" rel="noopener noreferrer">
+                  <a href={`https://wa.me/${content.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer">
                     <Button className="w-full gradient-primary shadow-glow">
                       <MessageCircle className="w-4 h-4" />
                       Start WhatsApp Chat
@@ -53,10 +109,10 @@ const Contact = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <a href="tel:+31612345678">
+                  <a href={`tel:${content.phone}`}>
                     <Button className="w-full" variant="outline">
                       <Phone className="w-4 h-4" />
-                      +31 6 12345678
+                      {content.phone}
                     </Button>
                   </a>
                 </CardContent>
@@ -73,10 +129,10 @@ const Contact = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <a href="mailto:info@cardetail-exclusief.nl">
+                  <a href={`mailto:${content.email}`}>
                     <Button className="w-full" variant="outline">
                       <Mail className="w-4 h-4" />
-                      info@cardetail-exclusief.nl
+                      {content.email}
                     </Button>
                   </a>
                 </CardContent>
@@ -89,13 +145,13 @@ const Contact = () => {
                   </div>
                   <CardTitle>Werkgebied</CardTitle>
                   <CardDescription>
-                    Wij komen bij u aan huis in heel Nederland
+                    {content.work_area}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <MapPin className="w-4 h-4 text-primary" />
-                    <span>Landelijk actief</span>
+                    <span>{content.work_area}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -113,18 +169,12 @@ const Contact = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Maandag - Vrijdag</span>
-                    <span className="font-semibold">09:00 - 17:00</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Zaterdag</span>
-                    <span className="font-semibold">Op afspraak</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Zondag</span>
-                    <span className="font-semibold">Gesloten</span>
-                  </div>
+                  {content.opening_hours.map((hour, index) => (
+                    <div key={index} className="flex justify-between items-center">
+                      <span className="text-muted-foreground">{hour.day}</span>
+                      <span className="font-semibold">{hour.hours}</span>
+                    </div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
