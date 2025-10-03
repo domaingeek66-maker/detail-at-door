@@ -38,6 +38,21 @@ const Booking = () => {
   const [errors, setErrors] = useState<Partial<Record<keyof BookingForm, string>>>({});
   const navigate = useNavigate();
 
+  // Clear selected time when services or date changes
+  const handleServiceToggle = (serviceId: string) => {
+    if (selectedServices.includes(serviceId)) {
+      setSelectedServices(selectedServices.filter(id => id !== serviceId));
+    } else {
+      setSelectedServices([...selectedServices, serviceId]);
+    }
+    setSelectedTime(""); // Reset time when services change
+  };
+
+  const handleDateSelect = (date: Date | undefined) => {
+    setSelectedDate(date);
+    setSelectedTime(""); // Reset time when date changes
+  };
+
   const { data: services } = useQuery({
     queryKey: ['services'],
     queryFn: async () => {
@@ -60,6 +75,25 @@ const Booking = () => {
       if (error) throw error;
       return data;
     },
+  });
+
+  // Get available timeslots based on selected services and date
+  const { data: timeslots, isLoading: timeslotsLoading } = useQuery({
+    queryKey: ['timeslots', selectedDate, selectedServices],
+    queryFn: async () => {
+      if (!selectedDate || selectedServices.length === 0) return [];
+      
+      const { data, error } = await supabase.functions.invoke('available-timeslots', {
+        body: {
+          date: format(selectedDate, 'yyyy-MM-dd'),
+          serviceIds: selectedServices,
+        },
+      });
+
+      if (error) throw error;
+      return data.timeslots || [];
+    },
+    enabled: !!selectedDate && selectedServices.length > 0,
   });
 
   const createBooking = useMutation({
@@ -102,7 +136,7 @@ const Booking = () => {
           vehicle_make: formData.vehicleMake!,
           vehicle_model: formData.vehicleModel!,
           appointment_date: format(selectedDate!, 'yyyy-MM-dd'),
-          appointment_time: selectedTime,
+          appointment_time: selectedTime + ':00',
           notes: formData.notes || null,
           status: 'pending',
         });
@@ -121,8 +155,6 @@ const Booking = () => {
     },
   });
 
-  const timeSlots = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"];
-
   const getAvailableDays = () => {
     if (!availability) return [];
     return availability.map(a => a.day_of_week);
@@ -131,7 +163,17 @@ const Booking = () => {
   const isDateDisabled = (date: Date) => {
     const availableDays = getAvailableDays();
     const dayOfWeek = date.getDay();
-    return !availableDays.includes(dayOfWeek) || date < new Date();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return !availableDays.includes(dayOfWeek) || date < today;
+  };
+
+  // Calculate total duration for display
+  const getTotalDuration = () => {
+    if (!services || selectedServices.length === 0) return 0;
+    return services
+      .filter(s => selectedServices.includes(s.id))
+      .reduce((sum, s) => sum + s.duration_min, 0);
   };
 
   const handleNext = () => {
@@ -236,13 +278,7 @@ const Booking = () => {
                     <div 
                       key={service.id}
                       className="flex items-start gap-4 p-4 rounded-lg border border-border hover:border-primary transition-smooth cursor-pointer"
-                      onClick={() => {
-                        if (selectedServices.includes(service.id)) {
-                          setSelectedServices(selectedServices.filter(id => id !== service.id));
-                        } else {
-                          setSelectedServices([...selectedServices, service.id]);
-                        }
-                      }}
+                      onClick={() => handleServiceToggle(service.id)}
                     >
                       <Checkbox 
                         checked={selectedServices.includes(service.id)}
@@ -281,7 +317,7 @@ const Booking = () => {
                     <Calendar
                       mode="single"
                       selected={selectedDate}
-                      onSelect={setSelectedDate}
+                      onSelect={handleDateSelect}
                       disabled={isDateDisabled}
                       locale={nl}
                       className="rounded-md border border-border p-3"
@@ -289,21 +325,44 @@ const Booking = () => {
                   </div>
                   
                   {selectedDate && (
-                    <div>
-                      <Label className="text-lg mb-4 block">Tijd</Label>
-                      <div className="grid grid-cols-4 gap-2">
-                        {timeSlots.map((time) => (
-                          <Button
-                            key={time}
-                            variant={selectedTime === time ? "default" : "outline"}
-                            onClick={() => setSelectedTime(time)}
-                            className={selectedTime === time ? "gradient-primary" : ""}
-                          >
-                            {time}
-                          </Button>
-                        ))}
+                    <>
+                      <div className="bg-primary/10 rounded-lg p-4 mb-4">
+                        <p className="text-sm text-muted-foreground">
+                          <strong className="text-foreground">Totale duur:</strong> {getTotalDuration()} minuten
+                          <br />
+                          <span className="text-xs">We plannen voldoende tijd in voor uw diensten</span>
+                        </p>
                       </div>
-                    </div>
+                      
+                      <div>
+                        <Label className="text-lg mb-4 block">Beschikbare tijden</Label>
+                        {timeslotsLoading ? (
+                          <div className="text-center py-8">
+                            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+                            <p className="text-sm text-muted-foreground mt-2">Beschikbare tijden laden...</p>
+                          </div>
+                        ) : timeslots && timeslots.length > 0 ? (
+                          <div className="grid grid-cols-4 gap-2">
+                            {timeslots.map((slot: { time: string; available: boolean }) => (
+                              <Button
+                                key={slot.time}
+                                variant={selectedTime === slot.time ? "default" : "outline"}
+                                onClick={() => slot.available && setSelectedTime(slot.time)}
+                                disabled={!slot.available}
+                                className={selectedTime === slot.time ? "gradient-primary" : ""}
+                              >
+                                {slot.time}
+                              </Button>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-8 bg-muted/50 rounded-lg">
+                            <p className="text-muted-foreground">Geen beschikbare tijden voor deze dag</p>
+                            <p className="text-sm text-muted-foreground mt-1">Kies een andere datum</p>
+                          </div>
+                        )}
+                      </div>
+                    </>
                   )}
                   
                   <div className="flex gap-4">

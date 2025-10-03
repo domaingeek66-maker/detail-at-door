@@ -1,1 +1,4 @@
 project_id = "ctunsjfxwwtlnvusmkxb"
+
+[functions.available-timeslots]
+verify_jwt = false
