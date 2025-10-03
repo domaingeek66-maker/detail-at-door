@@ -181,16 +181,48 @@ All colors MUST be HSL.
 }
 
 @media print {
+  @page {
+    size: A4;
+    margin: 1.5cm;
+  }
+  
   body * {
     visibility: hidden;
   }
+  
   #invoice, #invoice * {
     visibility: visible;
   }
+  
   #invoice {
     position: absolute;
     left: 0;
     top: 0;
     width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 1cm;
+    box-shadow: none;
+    border: none;
+  }
+  
+  /* Ensure text is black for printing */
+  #invoice * {
+    color: black !important;
+    background: white !important;
+  }
+  
+  /* Make sure tables print properly */
+  #invoice table {
+    page-break-inside: avoid;
+  }
+  
+  #invoice tr {
+    page-break-inside: avoid;
+  }
+  
+  /* Prevent orphaned content */
+  #invoice h1, #invoice h2, #invoice h3 {
+    page-break-after: avoid;
   }
 }

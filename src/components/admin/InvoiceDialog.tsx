@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
@@ -64,9 +64,12 @@ export function InvoiceDialog({ open, onOpenChange, appointment }: InvoiceDialog
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto print:max-w-full w-[95vw] sm:w-full">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-full">
         <DialogHeader className="print:hidden">
           <DialogTitle className="text-xl sm:text-2xl">Factuur</DialogTitle>
+          <DialogDescription className="sr-only">
+            Bekijk en download de factuur voor deze afspraak
+          </DialogDescription>
           <div className="flex flex-col sm:flex-row gap-2 pt-4">
             <Button onClick={handlePrint} variant="outline" size="sm" className="w-full sm:w-auto">
               <Printer className="h-4 w-4 mr-2" />
@@ -79,7 +82,7 @@ export function InvoiceDialog({ open, onOpenChange, appointment }: InvoiceDialog
           </div>
         </DialogHeader>
 
-        <div className="invoice-content p-4 sm:p-8 bg-white text-black" id="invoice">
+        <div className="invoice-content p-4 sm:p-8 bg-white text-black print:p-12" id="invoice">
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between mb-6 sm:mb-8 gap-4">
             <div>
