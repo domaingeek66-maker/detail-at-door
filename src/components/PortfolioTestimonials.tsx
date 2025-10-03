@@ -1,40 +1,47 @@
-import portfolio1 from "@/assets/portfolio-1.jpeg";
-import portfolio2 from "@/assets/portfolio-2.jpeg";
-import portfolio3 from "@/assets/portfolio-3.jpeg";
 import { Card, CardContent } from "@/components/ui/card";
 import { Star } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
-const portfolioItems = [
-  {
-    id: 1,
-    image: portfolio1,
-    alt: "Volvo interieur detailing met bescherming",
-    title: "Volvo Premium Detailing",
-    customer: "Jan de Vries",
-    rating: 5,
-    review: "Fantastisch werk! Mijn Volvo ziet er weer uit als nieuw. Het interieur is perfect schoongemaakt."
-  },
-  {
-    id: 2,
-    image: portfolio2,
-    alt: "Porsche interieur behandeling",
-    title: "Porsche Interior Care",
-    customer: "Sandra Bakker",
-    rating: 5,
-    review: "Zeer professioneel en nauwkeurig. De Porsche is perfect verzorgd, echt top service!"
-  },
-  {
-    id: 3,
-    image: portfolio3,
-    alt: "Volkswagen interieur reiniging",
-    title: "Volkswagen Deep Clean",
-    customer: "Mohammed Ali",
-    rating: 5,
-    review: "Geweldig resultaat! Alle vlekken zijn weg en de auto ruikt heerlijk fris. Absoluut een aanrader."
-  }
-];
+interface PortfolioItem {
+  id: string;
+  title: string;
+  image_url: string;
+  customer_name: string;
+  rating: number;
+  review: string;
+}
 
 export const PortfolioTestimonials = () => {
+  const [items, setItems] = useState<PortfolioItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
+  const fetchItems = async () => {
+    const { data, error } = await supabase
+      .from("portfolio_items")
+      .select("*")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true });
+
+    if (!error && data) {
+      setItems(data);
+    }
+    setLoading(false);
+  };
+
+  if (loading) {
+    return (
+      <section className="py-20 bg-gradient-to-b from-background to-muted/20">
+        <div className="container mx-auto px-4">
+          <div className="text-center">Laden...</div>
+        </div>
+      </section>
+    );
+  }
   return (
     <section className="py-20 bg-gradient-to-b from-background to-muted/20">
       <div className="container mx-auto px-4">
@@ -48,15 +55,15 @@ export const PortfolioTestimonials = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          {portfolioItems.map((item) => (
+          {items.map((item) => (
             <Card
               key={item.id}
               className="overflow-hidden group hover:shadow-xl transition-all duration-300 border-border"
             >
               <div className="aspect-[4/5] overflow-hidden relative">
                 <img
-                  src={item.image}
-                  alt={item.alt}
+                  src={item.image_url}
+                  alt={item.title}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   loading="lazy"
                 />
@@ -79,7 +86,7 @@ export const PortfolioTestimonials = () => {
                   "{item.review}"
                 </p>
                 <p className="text-sm font-semibold text-foreground">
-                  - {item.customer}
+                  - {item.customer_name}
                 </p>
               </CardContent>
             </Card>

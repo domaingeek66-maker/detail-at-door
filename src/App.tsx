@@ -19,6 +19,7 @@ import AdminAvailability from "./pages/admin/AdminAvailability";
 import AdminAbout from "./pages/admin/AdminAbout";
 import AdminContact from "./pages/admin/AdminContact";
 import AdminBlogPosts from "./pages/admin/AdminBlogPosts";
+import AdminPortfolio from "./pages/admin/AdminPortfolio";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 
@@ -45,6 +46,7 @@ const App = () => (
             <Route path="customers" element={<AdminCustomers />} />
             <Route path="availability" element={<AdminAvailability />} />
             <Route path="blog-posts" element={<AdminBlogPosts />} />
+            <Route path="portfolio" element={<AdminPortfolio />} />
             <Route path="about" element={<AdminAbout />} />
             <Route path="contact" element={<AdminContact />} />
             <Route path="settings" element={<AdminSettings />} />

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut, Calendar, Users, Settings, Clock, Menu, FileText, Phone, BookOpen } from "lucide-react";
+import { LogOut, Calendar, Users, Settings, Clock, Menu, FileText, Phone, BookOpen, Image } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Sheet,
@@ -122,6 +122,15 @@ export default function AdminLayout() {
                       Blog Posts
                     </Button>
                   </Link>
+                  <Link to="/admin/portfolio" onClick={() => setMobileMenuOpen(false)}>
+                    <Button
+                      variant={isActive("/admin/portfolio") ? "default" : "ghost"}
+                      className="w-full justify-start"
+                    >
+                      <Image className="mr-2 h-4 w-4" />
+                      Portfolio
+                    </Button>
+                  </Link>
                   <Link to="/admin/about" onClick={() => setMobileMenuOpen(false)}>
                     <Button
                       variant={isActive("/admin/about") ? "default" : "ghost"}
@@ -201,6 +210,15 @@ export default function AdminLayout() {
               >
                 <BookOpen className="mr-2 h-4 w-4" />
                 Blog Posts
+              </Button>
+            </Link>
+            <Link to="/admin/portfolio">
+              <Button
+                variant={isActive("/admin/portfolio") ? "default" : "ghost"}
+                className="w-full justify-start"
+              >
+                <Image className="mr-2 h-4 w-4" />
+                Portfolio
               </Button>
             </Link>
             <Link to="/admin/about">
