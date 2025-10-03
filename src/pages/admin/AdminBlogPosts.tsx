@@ -138,34 +138,29 @@ const AdminBlogPosts = () => {
 
   const generateAIBlogPosts = async () => {
     setIsGenerating(true);
-    const topics = [
-      "De complete gids voor auto detailing: Wat je moet weten",
-      "Ceramic coating vs wax: Wat is de beste bescherming voor jouw auto?",
-      "5 Tips om je auto showroom-clean te houden"
-    ];
+    const topic = "De complete gids voor auto detailing: Wat je moet weten";
 
     try {
-      for (const topic of topics) {
-        const { data, error } = await supabase.functions.invoke("generate-blog-post", {
-          body: { topic }
-        });
+      const { data, error } = await supabase.functions.invoke("generate-blog-post", {
+        body: { topic }
+      });
 
-        if (error) throw error;
+      if (error) throw error;
 
-        await supabase.from("blog_posts").insert({
-          title: data.title,
-          slug: generateSlug(data.title),
-          excerpt: data.excerpt,
-          content: data.content,
-          author: "Admin",
-          published: true
-        });
-      }
+      await supabase.from("blog_posts").insert({
+        title: data.title,
+        slug: generateSlug(data.title),
+        excerpt: data.excerpt,
+        content: data.content,
+        image_url: data.image_url,
+        author: "Admin",
+        published: true
+      });
 
       queryClient.invalidateQueries({ queryKey: ["admin-blog-posts"] });
       toast({ 
-        title: "3 blogposts gegenereerd!", 
-        description: "De AI heeft 3 SEO-geoptimaliseerde posts aangemaakt."
+        title: "Blogpost gegenereerd!", 
+        description: "De AI heeft een SEO-geoptimaliseerde post aangemaakt."
       });
     } catch (error: any) {
       toast({
@@ -204,7 +199,7 @@ const AdminBlogPosts = () => {
             ) : (
               <Sparkles className="h-4 w-4 mr-2" />
             )}
-            Genereer 3 Posts
+            Genereer Post
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
             setIsDialogOpen(open);
