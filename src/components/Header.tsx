@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Car } from "lucide-react";
+import { Car, Instagram } from "lucide-react";
 
 export const Header = () => {
   return (
@@ -28,6 +28,16 @@ export const Header = () => {
           </nav>
           
           <div className="flex items-center gap-4">
+            <a
+              href="https://www.instagram.com/cardetail.exclusief"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-smooth"
+              aria-label="Volg ons op Instagram @cardetail.exclusief"
+            >
+              <Instagram className="w-4 h-4" />
+              <span>@cardetail.exclusief</span>
+            </a>
             <Link to="/boeking">
               <Button className="gradient-primary shadow-glow">
                 Plan Afspraak
