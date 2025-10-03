@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut, Calendar, Users, Settings, Clock, Menu, FileText, Phone, BookOpen, Image, Briefcase } from "lucide-react";
+import { LogOut, Calendar, Users, Settings, Clock, Menu, FileText, Phone, BookOpen, Image, Briefcase, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Sheet,
@@ -158,6 +158,15 @@ export default function AdminLayout() {
                       Contact
                     </Button>
                   </Link>
+                  <Link to="/admin/broadcast" onClick={() => setMobileMenuOpen(false)}>
+                    <Button
+                      variant={isActive("/admin/broadcast") ? "default" : "ghost"}
+                      className="w-full justify-start"
+                    >
+                      <Send className="mr-2 h-4 w-4" />
+                      WhatsApp Broadcast
+                    </Button>
+                  </Link>
                   <Link to="/admin/settings" onClick={() => setMobileMenuOpen(false)}>
                     <Button
                       variant={isActive("/admin/settings") ? "default" : "ghost"}
@@ -255,6 +264,15 @@ export default function AdminLayout() {
               >
                 <Phone className="mr-2 h-4 w-4" />
                 Contact
+              </Button>
+            </Link>
+            <Link to="/admin/broadcast">
+              <Button
+                variant={isActive("/admin/broadcast") ? "default" : "ghost"}
+                className="w-full justify-start"
+              >
+                <Send className="mr-2 h-4 w-4" />
+                WhatsApp Broadcast
               </Button>
             </Link>
             <Link to="/admin/settings">

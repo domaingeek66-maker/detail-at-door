@@ -15,6 +15,14 @@ interface BroadcastRequest {
   customers: Customer[];
 }
 
+interface SendResult {
+  customer: string;
+  phone: string;
+  success: boolean;
+  messageId?: string;
+  error?: string;
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -26,74 +34,74 @@ serve(async (req) => {
 
     console.log(`Starting WhatsApp broadcast to ${customers.length} customers`);
 
-    // Get Twilio credentials from environment
-    const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID');
-    const authToken = Deno.env.get('TWILIO_AUTH_TOKEN');
-    const twilioWhatsAppNumber = Deno.env.get('TWILIO_WHATSAPP_NUMBER');
+    // Get WhatsApp Business API credentials from environment
+    const accessToken = Deno.env.get('WHATSAPP_ACCESS_TOKEN');
+    const phoneNumberId = Deno.env.get('WHATSAPP_PHONE_NUMBER_ID');
 
-    if (!accountSid || !authToken || !twilioWhatsAppNumber) {
-      throw new Error('Twilio credentials not configured. Please set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_WHATSAPP_NUMBER in Edge Functions secrets.');
+    if (!accessToken || !phoneNumberId) {
+      throw new Error('WhatsApp Business API credentials not configured. Please set WHATSAPP_ACCESS_TOKEN and WHATSAPP_PHONE_NUMBER_ID in Edge Functions secrets.');
     }
 
-    // Twilio API endpoint
-    const twilioUrl = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
-    
-    // Basic Auth for Twilio
-    const auth = btoa(`${accountSid}:${authToken}`);
+    // WhatsApp Business API endpoint
+    const whatsappUrl = `https://graph.facebook.com/v18.0/${phoneNumberId}/messages`;
 
-    const results = [];
+    const results: SendResult[] = [];
     let successCount = 0;
     let failCount = 0;
 
     // Send message to each customer
     for (const customer of customers) {
       try {
-        // Ensure phone number has correct format (should start with +)
-        let phoneNumber = customer.phone.trim();
-        if (!phoneNumber.startsWith('+')) {
+        // Ensure phone number has correct format (should start with country code, no +)
+        let phoneNumber = customer.phone.trim().replace(/\s/g, '');
+        if (phoneNumber.startsWith('+')) {
+          phoneNumber = phoneNumber.substring(1);
+        } else if (phoneNumber.startsWith('0')) {
+          // Assume Dutch number if starts with 0
+          phoneNumber = `31${phoneNumber.substring(1)}`;
+        } else if (!phoneNumber.startsWith('31')) {
           // Assume Dutch number if no country code
-          phoneNumber = phoneNumber.startsWith('0') 
-            ? `+31${phoneNumber.substring(1)}` 
-            : `+31${phoneNumber}`;
+          phoneNumber = `31${phoneNumber}`;
         }
-
-        // Format for WhatsApp
-        const toNumber = `whatsapp:${phoneNumber}`;
         
-        console.log(`Sending WhatsApp to ${customer.name} at ${toNumber}`);
+        console.log(`Sending WhatsApp to ${customer.name} at ${phoneNumber}`);
 
-        const response = await fetch(twilioUrl, {
+        const response = await fetch(whatsappUrl, {
           method: 'POST',
           headers: {
-            'Authorization': `Basic ${auth}`,
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
           },
-          body: new URLSearchParams({
-            From: twilioWhatsAppNumber,
-            To: toNumber,
-            Body: message,
+          body: JSON.stringify({
+            messaging_product: 'whatsapp',
+            to: phoneNumber,
+            type: 'text',
+            text: {
+              body: message,
+            },
           }),
         });
 
         const responseData = await response.json();
 
-        if (response.ok) {
-          console.log(`Successfully sent to ${customer.name}:`, responseData.sid);
+        if (response.ok && responseData.messages) {
+          console.log(`Successfully sent to ${customer.name}:`, responseData.messages[0].id);
           successCount++;
           results.push({
             customer: customer.name,
             phone: phoneNumber,
             success: true,
-            messageId: responseData.sid,
+            messageId: responseData.messages[0].id,
           });
         } else {
           console.error(`Failed to send to ${customer.name}:`, responseData);
           failCount++;
+          const errorMsg = responseData.error?.message || 'Unknown error';
           results.push({
             customer: customer.name,
             phone: phoneNumber,
             success: false,
-            error: responseData.message || 'Unknown error',
+            error: errorMsg,
           });
         }
 
@@ -107,7 +115,7 @@ serve(async (req) => {
           customer: customer.name,
           phone: customer.phone,
           success: false,
-          error: error.message,
+          error: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }
