@@ -13,7 +13,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
-import { User, Mail, Phone, MapPin, Calendar as CalendarIcon } from "lucide-react";
+import { User, Mail, Phone, MapPin, Calendar as CalendarIcon, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 interface Customer {
   id: string;
@@ -27,6 +28,7 @@ interface Customer {
 export default function AdminCustomers() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -53,6 +55,18 @@ export default function AdminCustomers() {
     setLoading(false);
   };
 
+  const filteredCustomers = customers.filter((customer) => {
+    if (!searchQuery) return true;
+    
+    const query = searchQuery.toLowerCase();
+    return (
+      customer.name.toLowerCase().includes(query) ||
+      customer.email.toLowerCase().includes(query) ||
+      customer.phone.toLowerCase().includes(query) ||
+      customer.address.toLowerCase().includes(query)
+    );
+  });
+
   if (loading) {
     return <div>Laden...</div>;
   }
@@ -66,9 +80,22 @@ export default function AdminCustomers() {
         </p>
       </div>
 
+      <div className="mb-6">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Zoek op naam, email, telefoon of adres..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+      </div>
+
       {isMobile ? (
         <div className="space-y-4">
-          {customers.map((customer) => (
+          {filteredCustomers.map((customer) => (
             <Card key={customer.id}>
               <CardContent className="p-4 space-y-3">
                 <div className="flex items-center gap-2">
@@ -112,7 +139,7 @@ export default function AdminCustomers() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {customers.map((customer) => (
+              {filteredCustomers.map((customer) => (
                 <TableRow key={customer.id}>
                   <TableCell className="font-medium">{customer.name}</TableCell>
                   <TableCell>{customer.email}</TableCell>
