@@ -20,6 +20,7 @@ import AdminAbout from "./pages/admin/AdminAbout";
 import AdminContact from "./pages/admin/AdminContact";
 import AdminBlogPosts from "./pages/admin/AdminBlogPosts";
 import AdminPortfolio from "./pages/admin/AdminPortfolio";
+import AdminServices from "./pages/admin/AdminServices";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 
@@ -44,6 +45,7 @@ const App = () => (
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="customers" element={<AdminCustomers />} />
+            <Route path="services" element={<AdminServices />} />
             <Route path="availability" element={<AdminAvailability />} />
             <Route path="blog-posts" element={<AdminBlogPosts />} />
             <Route path="portfolio" element={<AdminPortfolio />} />

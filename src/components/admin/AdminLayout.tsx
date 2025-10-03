@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut, Calendar, Users, Settings, Clock, Menu, FileText, Phone, BookOpen, Image } from "lucide-react";
+import { LogOut, Calendar, Users, Settings, Clock, Menu, FileText, Phone, BookOpen, Image, Briefcase } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Sheet,
@@ -104,6 +104,15 @@ export default function AdminLayout() {
                       Klanten
                     </Button>
                   </Link>
+                  <Link to="/admin/services" onClick={() => setMobileMenuOpen(false)}>
+                    <Button
+                      variant={isActive("/admin/services") ? "default" : "ghost"}
+                      className="w-full justify-start"
+                    >
+                      <Briefcase className="mr-2 h-4 w-4" />
+                      Diensten
+                    </Button>
+                  </Link>
                   <Link to="/admin/availability" onClick={() => setMobileMenuOpen(false)}>
                     <Button
                       variant={isActive("/admin/availability") ? "default" : "ghost"}
@@ -192,6 +201,15 @@ export default function AdminLayout() {
               >
                 <Users className="mr-2 h-4 w-4" />
                 Klanten
+              </Button>
+            </Link>
+            <Link to="/admin/services">
+              <Button
+                variant={isActive("/admin/services") ? "default" : "ghost"}
+                className="w-full justify-start"
+              >
+                <Briefcase className="mr-2 h-4 w-4" />
+                Diensten
               </Button>
             </Link>
             <Link to="/admin/availability">
