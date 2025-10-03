@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -20,9 +20,9 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { format } from "date-fns";
+import { format, startOfWeek, startOfMonth, startOfYear, isAfter } from "date-fns";
 import { nl } from "date-fns/locale";
-import { Trash2, FileText, Calendar as CalendarIcon, Clock, User, Car, Search } from "lucide-react";
+import { Trash2, FileText, Calendar as CalendarIcon, Clock, User, Car, Search, Euro, Users, CheckCircle2 } from "lucide-react";
 import { InvoiceDialog } from "@/components/admin/InvoiceDialog";
 import { Input } from "@/components/ui/input";
 
@@ -48,16 +48,28 @@ interface Appointment {
   };
 }
 
+interface Service {
+  id: string;
+  price: number;
+}
+
+type PeriodFilter = "all" | "week" | "month" | "year";
+
 export default function AdminDashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
+  const [totalCustomers, setTotalCustomers] = useState(0);
   const [loading, setLoading] = useState(true);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [periodFilter, setPeriodFilter] = useState<PeriodFilter>("all");
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
   useEffect(() => {
     fetchAppointments();
+    fetchServices();
+    fetchCustomersCount();
   }, []);
 
   const fetchAppointments = async () => {
@@ -80,6 +92,32 @@ export default function AdminDashboard() {
 
     setAppointments(data || []);
     setLoading(false);
+  };
+
+  const fetchServices = async () => {
+    const { data, error } = await supabase
+      .from("services")
+      .select("id, price");
+
+    if (error) {
+      console.error("Error fetching services:", error);
+      return;
+    }
+
+    setServices(data || []);
+  };
+
+  const fetchCustomersCount = async () => {
+    const { count, error } = await supabase
+      .from("customers")
+      .select("*", { count: "exact", head: true });
+
+    if (error) {
+      console.error("Error fetching customers count:", error);
+      return;
+    }
+
+    setTotalCustomers(count || 0);
   };
 
   const updateStatus = async (id: string, status: string) => {
@@ -146,7 +184,32 @@ export default function AdminDashboard() {
     );
   };
 
-  const filteredAppointments = appointments.filter((appointment) => {
+  const getFilteredAppointmentsByPeriod = () => {
+    const now = new Date();
+    let startDate: Date;
+
+    switch (periodFilter) {
+      case "week":
+        startDate = startOfWeek(now, { locale: nl });
+        break;
+      case "month":
+        startDate = startOfMonth(now);
+        break;
+      case "year":
+        startDate = startOfYear(now);
+        break;
+      default:
+        return appointments;
+    }
+
+    return appointments.filter((appointment) =>
+      isAfter(new Date(appointment.appointment_date), startDate)
+    );
+  };
+
+  const filteredAppointmentsByPeriod = getFilteredAppointmentsByPeriod();
+
+  const filteredAppointments = filteredAppointmentsByPeriod.filter((appointment) => {
     if (!searchQuery) return true;
     
     const query = searchQuery.toLowerCase();
@@ -163,6 +226,25 @@ export default function AdminDashboard() {
     );
   });
 
+  const calculateRevenue = () => {
+    return filteredAppointmentsByPeriod.reduce((total, appointment) => {
+      if (appointment.status === "cancelled") return total;
+      
+      const servicesTotal = appointment.service_ids.reduce((sum, serviceId) => {
+        const service = services.find((s) => s.id === serviceId);
+        return sum + (service?.price || 0);
+      }, 0);
+
+      return total + servicesTotal + (appointment.travel_cost || 0);
+    }, 0);
+  };
+
+  const getCompletedAppointments = () => {
+    return filteredAppointmentsByPeriod.filter(
+      (appointment) => appointment.status === "completed"
+    ).length;
+  };
+
   if (loading) {
     return <div>Laden...</div>;
   }
@@ -170,10 +252,86 @@ export default function AdminDashboard() {
   return (
     <div className="p-4 sm:p-6">
       <div className="mb-6">
-        <h2 className="text-2xl sm:text-3xl font-bold">Afspraken Beheer</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold">Dashboard</h2>
         <p className="text-sm sm:text-base text-muted-foreground mt-2">
-          Bekijk en beheer alle afspraken
+          Overzicht van je bedrijf
         </p>
+      </div>
+
+      <div className="mb-6">
+        <Select value={periodFilter} onValueChange={(value) => setPeriodFilter(value as PeriodFilter)}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="Selecteer periode" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Alle tijd</SelectItem>
+            <SelectItem value="week">Deze week</SelectItem>
+            <SelectItem value="month">Deze maand</SelectItem>
+            <SelectItem value="year">Dit jaar</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Totale Omzet</CardTitle>
+            <Euro className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">€{calculateRevenue().toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {periodFilter === "all" ? "Sinds het begin" : 
+               periodFilter === "week" ? "Deze week" :
+               periodFilter === "month" ? "Deze maand" : "Dit jaar"}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Totaal Klanten</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{totalCustomers}</div>
+            <p className="text-xs text-muted-foreground mt-1">Alle tijd</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Afspraken</CardTitle>
+            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{filteredAppointmentsByPeriod.length}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {periodFilter === "all" ? "Alle afspraken" : 
+               periodFilter === "week" ? "Deze week" :
+               periodFilter === "month" ? "Deze maand" : "Dit jaar"}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Voltooid</CardTitle>
+            <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{getCompletedAppointments()}</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              {periodFilter === "all" ? "Sinds het begin" : 
+               periodFilter === "week" ? "Deze week" :
+               periodFilter === "month" ? "Deze maand" : "Dit jaar"}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="mb-4">
+        <h3 className="text-xl font-semibold mb-2">Afspraken</h3>
       </div>
 
       <div className="mb-6">
