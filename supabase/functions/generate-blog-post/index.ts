@@ -18,24 +18,43 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = `Je bent een expert content writer gespecialiseerd in auto detailing en car care. 
-Schrijf SEO-geoptimaliseerde blogposts in het Nederlands met:
-- Een pakkende titel (max 60 karakters)
-- Een korte samenvatting/excerpt (max 160 karakters)
-- Uitgebreide, informatieve content (minimaal 500 woorden)
-- Gebruik van relevante zoekwoorden
-- Praktische tips en advies
-- Professionele maar toegankelijke toon`;
+    const systemPrompt = `Je bent een ervaren SEO content writer en auto detailing specialist. 
+Creëer UNIEKE, originele blogposts in perfect Nederlands met:
 
-    const userPrompt = `Schrijf een complete blogpost over: ${topic}
+SEO VEREISTEN:
+- Pakkende H1 titel met hoofdzoekwoord (50-60 karakters)
+- Meta description met call-to-action (150-160 karakters)
+- Natuurlijke keyword integratie (detailing, carwash, autopflege, coating, poetsen)
+- Long-tail zoekwoorden en semantische variaties
+- Leesbare structuur met korte paragrafen (3-4 zinnen)
 
-Structureer de content met:
-- Inleiding
-- Meerdere paragrafen met subonderwerpen
-- Praktische tips
-- Conclusie
+CONTENT KWALITEIT:
+- Minimaal 800 woorden unieke, waardevolle content
+- Storytelling elementen en praktijkvoorbeelden
+- Concrete tips met actiewaarde
+- Expertise en autoriteit tonen
+- Conversational maar professionele toon
 
-Zorg voor natuurlijke zoekwoorden zoals: auto detailing, carwash, poetsen, waxen, onderhoud, bescherming, etc.`;
+STRUCTUUR (gebruik alleen tekst, GEEN HTML tags of markdown):
+Inleiding: probleem/vraag adresseren
+Hoofddelen: 3-4 secties met duidelijke onderverdeling
+Tips sectie: praktische actiepunten
+Afsluiting: samenvatting + call-to-action
+
+BELANGRIJK: Schrijf alleen platte tekst zonder HTML tags, markdown symbolen of speciale opmaak. Gebruik alleen normale tekst met lege regels tussen paragrafen.`;
+
+    const userPrompt = `Schrijf een unieke, SEO-geoptimaliseerde blogpost over: ${topic}
+
+Focus op:
+- Originele invalshoek en frisse content
+- Nederlandse zoekintentie en taalgebruik
+- Praktische waarde voor autobezitters
+- Lokale expertise en kennis
+- Natuurlijke keyword integratie
+
+Zoekwoorden om te integreren: auto detailing, carwash, poetsen, waxen, ceramic coating, interieur reiniging, lak bescherming, auto onderhoud, glans, bescherming
+
+GEEN HTML TAGS OF MARKDOWN - alleen platte tekst met lege regels tussen paragrafen.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",

@@ -100,11 +100,26 @@ const BlogPost = () => {
             </div>
 
             <div className="prose prose-lg max-w-none">
-              {post.content.split("\n").map((paragraph, index) => (
-                <p key={index} className="mb-4">
-                  {paragraph}
-                </p>
-              ))}
+              {post.content
+                .split("\n")
+                .filter(paragraph => paragraph.trim().length > 0)
+                .map((paragraph, index) => {
+                  // Remove any HTML tags and special characters
+                  const cleanText = paragraph
+                    .replace(/<[^>]*>/g, '') // Remove HTML tags
+                    .replace(/\*\*/g, '') // Remove markdown bold
+                    .replace(/#{1,6}\s/g, '') // Remove markdown headers
+                    .replace(/\[|\]/g, '') // Remove brackets
+                    .trim();
+                  
+                  if (!cleanText) return null;
+                  
+                  return (
+                    <p key={index} className="mb-6 leading-relaxed text-lg">
+                      {cleanText}
+                    </p>
+                  );
+                })}
             </div>
           </div>
         </article>
