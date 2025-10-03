@@ -20,7 +20,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
-import { Trash2 } from "lucide-react";
+import { Trash2, FileText } from "lucide-react";
+import { InvoiceDialog } from "@/components/admin/InvoiceDialog";
 
 interface Appointment {
   id: string;
@@ -42,6 +43,7 @@ interface Appointment {
 export default function AdminDashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -199,6 +201,14 @@ export default function AdminDashboard() {
                     <Button
                       variant="ghost"
                       size="icon"
+                      onClick={() => setSelectedAppointment(appointment)}
+                      title="Factuur genereren"
+                    >
+                      <FileText className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => deleteAppointment(appointment.id)}
                     >
                       <Trash2 className="h-4 w-4" />
@@ -210,6 +220,14 @@ export default function AdminDashboard() {
           </TableBody>
         </Table>
       </div>
+
+      {selectedAppointment && (
+        <InvoiceDialog
+          open={!!selectedAppointment}
+          onOpenChange={(open) => !open && setSelectedAppointment(null)}
+          appointment={selectedAppointment}
+        />
+      )}
     </div>
   );
 }

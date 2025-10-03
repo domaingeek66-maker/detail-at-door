@@ -142,3 +142,18 @@ All colors MUST be HSL.
     transition: var(--transition-smooth);
   }
 }
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #invoice, #invoice * {
+    visibility: visible;
+  }
+  #invoice {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
