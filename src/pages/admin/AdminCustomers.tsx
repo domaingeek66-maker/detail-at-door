@@ -13,8 +13,20 @@ import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
-import { User, Mail, Phone, MapPin, Calendar as CalendarIcon, Search } from "lucide-react";
+import { User, Mail, Phone, MapPin, Calendar as CalendarIcon, Search, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Customer {
   id: string;
@@ -53,6 +65,28 @@ export default function AdminCustomers() {
 
     setCustomers(data || []);
     setLoading(false);
+  };
+
+  const deleteCustomer = async (id: string) => {
+    const { error } = await supabase
+      .from("customers")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Fout bij verwijderen",
+        description: error.message,
+      });
+      return;
+    }
+
+    toast({
+      title: "Verwijderd",
+      description: "De klant is succesvol verwijderd",
+    });
+    fetchCustomers();
   };
 
   const filteredCustomers = customers.filter((customer) => {
@@ -122,6 +156,33 @@ export default function AdminCustomers() {
                     </span>
                   </div>
                 </div>
+                <div className="pt-3 border-t border-border">
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" size="sm" className="w-full">
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Verwijderen
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Klant verwijderen?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Weet je zeker dat je {customer.name} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Annuleren</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => deleteCustomer(customer.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Verwijderen
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -136,6 +197,7 @@ export default function AdminCustomers() {
                 <TableHead>Telefoon</TableHead>
                 <TableHead>Adres</TableHead>
                 <TableHead>Geregistreerd op</TableHead>
+                <TableHead className="text-right">Acties</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -147,6 +209,32 @@ export default function AdminCustomers() {
                   <TableCell>{customer.address}</TableCell>
                   <TableCell>
                     {format(new Date(customer.created_at), "dd MMMM yyyy", { locale: nl })}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Klant verwijderen?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Weet je zeker dat je {customer.name} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Annuleren</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => deleteCustomer(customer.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Verwijderen
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </TableCell>
                 </TableRow>
               ))}
