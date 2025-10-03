@@ -22,8 +22,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
-import { Trash2, FileText, Calendar as CalendarIcon, Clock, User, Car } from "lucide-react";
+import { Trash2, FileText, Calendar as CalendarIcon, Clock, User, Car, Search } from "lucide-react";
 import { InvoiceDialog } from "@/components/admin/InvoiceDialog";
+import { Input } from "@/components/ui/input";
 
 interface Appointment {
   id: string;
@@ -51,6 +52,7 @@ export default function AdminDashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -144,6 +146,23 @@ export default function AdminDashboard() {
     );
   };
 
+  const filteredAppointments = appointments.filter((appointment) => {
+    if (!searchQuery) return true;
+    
+    const query = searchQuery.toLowerCase();
+    return (
+      appointment.customers.name.toLowerCase().includes(query) ||
+      appointment.customers.email.toLowerCase().includes(query) ||
+      appointment.customers.phone.toLowerCase().includes(query) ||
+      appointment.vehicle_make.toLowerCase().includes(query) ||
+      appointment.vehicle_model.toLowerCase().includes(query) ||
+      appointment.street_address.toLowerCase().includes(query) ||
+      appointment.city.toLowerCase().includes(query) ||
+      appointment.postal_code.toLowerCase().includes(query) ||
+      appointment.status.toLowerCase().includes(query)
+    );
+  });
+
   if (loading) {
     return <div>Laden...</div>;
   }
@@ -157,9 +176,22 @@ export default function AdminDashboard() {
         </p>
       </div>
 
+      <div className="mb-6">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Zoek op klant, voertuig, adres of status..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+      </div>
+
       {isMobile ? (
         <div className="space-y-4">
-          {appointments.map((appointment) => (
+          {filteredAppointments.map((appointment) => (
             <Card key={appointment.id} className="overflow-hidden">
               <CardContent className="p-4">
                 <div className="space-y-3">
@@ -257,7 +289,7 @@ export default function AdminDashboard() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {appointments.map((appointment) => (
+              {filteredAppointments.map((appointment) => (
                 <TableRow key={appointment.id}>
                   <TableCell>
                     {format(new Date(appointment.appointment_date), "dd MMMM yyyy", { locale: nl })}
