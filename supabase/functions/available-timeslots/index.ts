@@ -63,19 +63,9 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Get services to calculate total duration
-    const { data: services, error: servicesError } = await supabaseClient
-      .from('services')
-      .select('duration_min')
-      .in('id', serviceIds);
-
-    if (servicesError) {
-      console.error('Error fetching services:', servicesError);
-      throw servicesError;
-    }
-
-    const totalDurationMin = services.reduce((sum, s) => sum + s.duration_min, 0);
-    console.log('Total duration needed:', totalDurationMin, 'minutes');
+    // Fixed 30 minute booking slot duration
+    const bookingSlotDuration = 30;
+    console.log('Booking slot duration:', bookingSlotDuration, 'minutes');
 
     // Get existing appointments for this date
     const { data: appointments, error: appointmentsError } = await supabaseClient
@@ -96,28 +86,12 @@ Deno.serve(async (req) => {
     
     for (const apt of appointments || []) {
       try {
-        // Get duration of existing appointment
-        const { data: aptServices, error: servicesError } = await supabaseClient
-          .from('services')
-          .select('duration_min')
-          .in('id', apt.service_ids);
-        
-        if (servicesError) {
-          console.error('Error fetching appointment services:', servicesError);
-          continue;
-        }
-        
-        if (!aptServices || aptServices.length === 0) {
-          console.warn('No services found for appointment:', apt.service_ids);
-          continue;
-        }
-        
-        const aptDuration = aptServices.reduce((sum, s) => sum + s.duration_min, 0);
+        // Each appointment blocks 30 minutes regardless of service duration
         const [hours, minutes] = apt.appointment_time.split(':').map(Number);
         const startMinutes = hours * 60 + minutes;
-        const endMinutes = startMinutes + aptDuration;
+        const endMinutes = startMinutes + bookingSlotDuration;
         
-        console.log(`Appointment at ${apt.appointment_time}: ${startMinutes}-${endMinutes} (${aptDuration}min)`);
+        console.log(`Appointment at ${apt.appointment_time}: ${startMinutes}-${endMinutes} (${bookingSlotDuration}min)`);
         occupiedRanges.push({ start: startMinutes, end: endMinutes });
       } catch (error) {
         console.error('Error processing appointment:', error);
@@ -136,13 +110,13 @@ Deno.serve(async (req) => {
     const timeslots: TimeSlot[] = [];
     
     // Generate slots every 30 minutes
-    for (let minutes = dayStartMinutes; minutes <= dayEndMinutes - totalDurationMin; minutes += 30) {
+    for (let minutes = dayStartMinutes; minutes <= dayEndMinutes - bookingSlotDuration; minutes += 30) {
       const hours = Math.floor(minutes / 60);
       const mins = minutes % 60;
       const timeStr = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
       
-      // Check if this slot + duration overlaps with any occupied range
-      const slotEnd = minutes + totalDurationMin;
+      // Check if this slot overlaps with any occupied range
+      const slotEnd = minutes + bookingSlotDuration;
       const isAvailable = !occupiedRanges.some(range => 
         // Check if there's any overlap
         (minutes < range.end && slotEnd > range.start)
