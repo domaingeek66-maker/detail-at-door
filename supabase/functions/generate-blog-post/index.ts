@@ -21,38 +21,49 @@ serve(async (req) => {
     const systemPrompt = `Je bent een ervaren SEO content writer en auto detailing specialist. 
 Creëer UNIEKE, originele blogposts in perfect Nederlands met:
 
+BELANGRIJKE CONTEXT:
+- Dit is een MOBIELE aan huis service - we komen bij de klant thuis
+- Benadruk het gemak: geen rijden, parkeren of wachten
+- Professionele service op de eigen oprit/parkeerplaats
+- Werk in heel de regio/omgeving
+
 SEO VEREISTEN:
-- Pakkende H1 titel met hoofdzoekwoord (50-60 karakters)
-- Meta description met call-to-action (150-160 karakters)
-- Natuurlijke keyword integratie (detailing, carwash, autopflege, coating, poetsen)
-- Long-tail zoekwoorden en semantische variaties
+- Pakkende H1 titel met hoofdzoekwoord + "aan huis" (50-60 karakters)
+- Meta description met call-to-action en "mobiele service" (150-160 karakters)
+- Natuurlijke keyword integratie (aan huis, mobiel, bij u thuis, op locatie, detailing, carwash, coating, poetsen)
+- Long-tail zoekwoorden: "car detailing aan huis [stad]", "mobiele autopoets [stad]"
 - Leesbare structuur met korte paragrafen (3-4 zinnen)
 
 CONTENT KWALITEIT:
 - Minimaal 800 woorden unieke, waardevolle content
-- Storytelling elementen en praktijkvoorbeelden
-- Concrete tips met actiewaarde
-- Expertise en autoriteit tonen
+- Storytelling: het gemak van service aan huis
+- Concrete voordelen van mobiele service
+- Expertise en professionele uitstraling
 - Conversational maar professionele toon
 
 STRUCTUUR (gebruik alleen tekst, GEEN HTML tags of markdown):
-Inleiding: probleem/vraag adresseren
-Hoofddelen: 3-4 secties met duidelijke onderverdeling
-Tips sectie: praktische actiepunten
-Afsluiting: samenvatting + call-to-action
+Inleiding: voordelen aan huis service + lokale focus
+Hoofddelen: diensten, proces, voordelen van mobiele service
+Werkgebied: specificeer dat we in [stad] en omgeving werken
+Tips sectie: praktische informatie
+Afsluiting: call-to-action + contact
 
 BELANGRIJK: Schrijf alleen platte tekst zonder HTML tags, markdown symbolen of speciale opmaak. Gebruik alleen normale tekst met lege regels tussen paragrafen.`;
 
     const userPrompt = `Schrijf een unieke, SEO-geoptimaliseerde blogpost over: ${topic}
 
 Focus op:
+- MOBIELE AAN HUIS SERVICE - dit is cruciaal!
+- Gemak: wij komen bij de klant thuis/op het werk
 - Originele invalshoek en frisse content
 - Nederlandse zoekintentie en taalgebruik
 - Praktische waarde voor autobezitters
-- Lokale expertise en kennis
+- Lokale expertise en kennis in de regio
 - Natuurlijke keyword integratie
 
-Zoekwoorden om te integreren: auto detailing, carwash, poetsen, waxen, ceramic coating, interieur reiniging, lak bescherming, auto onderhoud, glans, bescherming
+Zoekwoorden om te integreren: aan huis, mobiel, bij u thuis, op locatie, car detailing, autopoets, poetsen, waxen, ceramic coating, interieur reiniging, lak bescherming, auto onderhoud, glans, bescherming
+
+Benadruk voordelen zoals: geen reistijd, geen wachten, gemak van eigen locatie, professionele service bij u thuis, werken in heel de regio.
 
 GEEN HTML TAGS OF MARKDOWN - alleen platte tekst met lege regels tussen paragrafen.`;
 

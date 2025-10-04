@@ -176,7 +176,7 @@ const AdminBlogPosts = () => {
   };
 
   const generateLocalSeoBlogPost = async (city: string) => {
-    const topic = `Car Detailing in ${city}: Professionele Autopoets en Detailing Service`;
+    const topic = `Car Detailing Aan Huis in ${city}: Mobiele Professionele Autopoets Service Bij U Thuis`;
 
     try {
       const { data, error } = await supabase.functions.invoke("generate-blog-post", {
