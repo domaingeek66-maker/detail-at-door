@@ -209,26 +209,6 @@ export default function AdminBroadcast() {
             </Button>
           </CardContent>
         </Card>
-
-        <Card className="border-yellow-500/50 bg-yellow-500/5">
-          <CardHeader>
-            <CardTitle className="text-yellow-600 dark:text-yellow-500">
-              ⚠️ WhatsApp Business API Setup
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm">
-            <p>Voor WhatsApp berichten heeft u de volgende credentials nodig:</p>
-            <ul className="list-disc list-inside space-y-1 ml-2">
-              <li>WHATSAPP_ACCESS_TOKEN (van Meta Business Manager)</li>
-              <li>WHATSAPP_PHONE_NUMBER_ID (van uw WhatsApp Business account)</li>
-            </ul>
-            <p className="mt-3">
-              Deze kunt u instellen via de Admin Instellingen pagina.
-              <br />
-              Let op: Telefoonnummers moeten in het formaat +31612345678 zijn.
-            </p>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
