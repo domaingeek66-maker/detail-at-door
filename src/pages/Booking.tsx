@@ -14,8 +14,9 @@ import { format } from "date-fns";
 import { nl } from "date-fns/locale";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
-import { CheckCircle2, Calendar as CalendarIcon, User, Car as CarIcon, Tag, X } from "lucide-react";
+import { CheckCircle2, Calendar as CalendarIcon, User, Car as CarIcon, Tag, X, AlertCircle } from "lucide-react";
 import { z } from "zod";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const bookingSchema = z.object({
   name: z.string().min(2, "Naam moet minimaal 2 karakters zijn").max(100),
@@ -53,6 +54,7 @@ const Booking = () => {
   } | null>(null);
   const [discountError, setDiscountError] = useState("");
   const [isValidatingDiscount, setIsValidatingDiscount] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   // Clear selected time when services or date changes
@@ -119,16 +121,20 @@ const Booking = () => {
       const validationResult = bookingSchema.safeParse(formData);
       if (!validationResult.success) {
         const newErrors: Partial<Record<keyof BookingForm, string>> = {};
+        const errorMessages: string[] = [];
         validationResult.error.errors.forEach((err) => {
           if (err.path[0]) {
             newErrors[err.path[0] as keyof BookingForm] = err.message;
+            errorMessages.push(err.message);
           }
         });
         setErrors(newErrors);
+        setSubmitError(`Controleer de volgende velden: ${errorMessages.join(', ')}`);
         throw new Error("Validatie mislukt");
       }
       
       setErrors({});
+      setSubmitError(null);
 
       // Calculate prices
       const originalPrice = (services?.filter(s => selectedServices.includes(s.id))
@@ -146,7 +152,21 @@ const Booking = () => {
           _address: `${formData.streetAddress}, ${formData.postalCode} ${formData.city}`,
         });
 
-      if (customerError) throw customerError;
+      if (customerError) {
+        let errorMsg = "Fout bij aanmaken klantgegevens. ";
+        if (customerError.message.includes("email")) {
+          errorMsg += "Controleer uw e-mailadres.";
+        } else if (customerError.message.includes("phone")) {
+          errorMsg += "Controleer uw telefoonnummer (formaat: +31612345678).";
+        } else if (customerError.message.includes("Name")) {
+          errorMsg += "Controleer uw naam (minimaal 2 karakters).";
+        } else if (customerError.message.includes("Address")) {
+          errorMsg += "Controleer uw adres (minimaal 5 karakters).";
+        } else {
+          errorMsg += customerError.message;
+        }
+        throw new Error(errorMsg);
+      }
 
       // Create appointment with separated address fields and travel cost
       const { error: appointmentError } = await supabase
@@ -171,7 +191,15 @@ const Booking = () => {
           final_price: finalPrice,
         });
 
-      if (appointmentError) throw appointmentError;
+      if (appointmentError) {
+        let errorMsg = "Fout bij aanmaken afspraak. ";
+        if (appointmentError.message.includes("vehicle")) {
+          errorMsg += "Controleer het automerk en -model.";
+        } else {
+          errorMsg += "Probeer het opnieuw of neem contact met ons op.";
+        }
+        throw new Error(errorMsg);
+      }
 
       // Update discount code usage if applied
       if (appliedDiscount) {
@@ -191,12 +219,16 @@ const Booking = () => {
     },
     onSuccess: () => {
       setStep(5);
+      setSubmitError(null);
       toast.success("Afspraak succesvol ingepland!");
     },
     onError: (error: Error) => {
       console.error('Booking error:', error);
       if (error.message !== "Validatie mislukt") {
-        toast.error("Er ging iets mis. Probeer het opnieuw.");
+        setSubmitError(error.message);
+        toast.error(error.message);
+      } else {
+        toast.error("Controleer alle verplichte velden");
       }
     },
   });
@@ -557,6 +589,13 @@ const Booking = () => {
                   <CardDescription>Vul uw contactgegevens en voertuiginformatie in</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                  {submitError && (
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertTitle>Fout bij invullen</AlertTitle>
+                      <AlertDescription>{submitError}</AlertDescription>
+                    </Alert>
+                  )}
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="name">Naam *</Label>
@@ -693,6 +732,13 @@ const Booking = () => {
                   <CardDescription>Kijk alles na voordat u bevestigt</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                  {submitError && (
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertTitle>Kan boeking niet plaatsen</AlertTitle>
+                      <AlertDescription>{submitError}</AlertDescription>
+                    </Alert>
+                  )}
                   <div>
                     <h3 className="font-semibold mb-2">Gekozen Diensten</h3>
                     <ul className="space-y-1">
