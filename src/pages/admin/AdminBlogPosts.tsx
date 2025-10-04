@@ -35,6 +35,8 @@ const AdminBlogPosts = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isLocalSeoDialogOpen, setIsLocalSeoDialogOpen] = useState(false);
+  const [cityInput, setCityInput] = useState("");
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
@@ -173,6 +175,77 @@ const AdminBlogPosts = () => {
     }
   };
 
+  const generateLocalSeoBlogPost = async (city: string) => {
+    const topic = `Car Detailing in ${city}: Professionele Autopoets en Detailing Service`;
+
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-blog-post", {
+        body: { topic }
+      });
+
+      if (error) throw error;
+
+      await supabase.from("blog_posts").insert({
+        title: data.title,
+        slug: generateSlug(data.title),
+        excerpt: data.excerpt,
+        content: data.content,
+        image_url: data.image_url || "/placeholder.svg",
+        author: "Admin",
+        published: true
+      });
+
+      return true;
+    } catch (error: any) {
+      console.error(`Fout bij genereren voor ${city}:`, error);
+      throw error;
+    }
+  };
+
+  const handleLocalSeoGeneration = async () => {
+    if (!cityInput.trim()) {
+      toast({
+        title: "Fout",
+        description: "Voer minstens één stad in",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    const cities = cityInput.split(",").map(city => city.trim()).filter(city => city.length > 0);
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const city of cities) {
+      try {
+        await generateLocalSeoBlogPost(city);
+        successCount++;
+        toast({
+          title: `✓ ${city} voltooid`,
+          description: `Lokale SEO blogpost voor ${city} is aangemaakt`
+        });
+      } catch (error) {
+        failCount++;
+        toast({
+          title: `✗ ${city} mislukt`,
+          description: `Kon geen blogpost maken voor ${city}`,
+          variant: "destructive"
+        });
+      }
+    }
+
+    setIsGenerating(false);
+    setIsLocalSeoDialogOpen(false);
+    setCityInput("");
+    queryClient.invalidateQueries({ queryKey: ["admin-blog-posts"] });
+
+    toast({
+      title: "Generatie voltooid",
+      description: `${successCount} posts aangemaakt, ${failCount} mislukt`
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -201,6 +274,52 @@ const AdminBlogPosts = () => {
             )}
             Genereer Post
           </Button>
+          <Dialog open={isLocalSeoDialogOpen} onOpenChange={setIsLocalSeoDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" disabled={isGenerating}>
+                <Sparkles className="h-4 w-4 mr-2" />
+                Lokale SEO Posts
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Genereer Lokale SEO Blogposts</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="cities">Steden (gescheiden door komma's)</Label>
+                  <Textarea
+                    id="cities"
+                    placeholder="Weert, Eindhoven, Roermond, Venlo, Helmond"
+                    value={cityInput}
+                    onChange={(e) => setCityInput(e.target.value)}
+                    rows={4}
+                    className="mt-2"
+                  />
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Voer meerdere steden in gescheiden door komma's. Voor elke stad wordt een unieke SEO-geoptimaliseerde blogpost gegenereerd.
+                  </p>
+                </div>
+                <Button 
+                  onClick={handleLocalSeoGeneration}
+                  disabled={isGenerating || !cityInput.trim()}
+                  className="w-full"
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Bezig met genereren...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Genereer Blogposts
+                    </>
+                  )}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
           <Dialog open={isDialogOpen} onOpenChange={(open) => {
             setIsDialogOpen(open);
             if (!open) resetForm();
