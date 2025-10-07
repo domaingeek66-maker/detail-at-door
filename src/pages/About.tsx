@@ -3,8 +3,10 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Award, Shield, Heart, Sparkles, Loader2 } from "lucide-react";
+import { Award, Shield, Heart, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { SEO } from "@/components/SEO";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 interface AboutContent {
   mission_title: string;
@@ -58,19 +60,34 @@ const About = () => {
   ];
   if (loading) {
     return (
-      <div className="min-h-screen">
-        <Header />
-        <main className="pt-24 pb-20 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </main>
-        <Footer />
-      </div>
+      <>
+        <SEO 
+          title="Over Ons - Premium Car Detailing met Passie"
+          description="Leer meer over Cardetail Exclusief. Ons team van ervaren specialisten biedt professionele car detailing service aan huis met passie voor perfectie."
+          keywords="over ons, car detailing bedrijf, professionele autopoets, ervaren detailers"
+          url="https://cardetail-exclusief.nl/over-ons"
+        />
+        <div className="min-h-screen">
+          <Header />
+          <main className="pt-24 pb-20 flex items-center justify-center">
+            <LoadingSpinner />
+          </main>
+          <Footer />
+        </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen">
-      <Header />
+    <>
+      <SEO 
+        title="Over Ons - Premium Car Detailing met Passie"
+        description="Leer meer over Cardetail Exclusief. Ons team van ervaren specialisten biedt professionele car detailing service aan huis met passie voor perfectie."
+        keywords="over ons, car detailing bedrijf, professionele autopoets, ervaren detailers"
+        url="https://cardetail-exclusief.nl/over-ons"
+      />
+      <div className="min-h-screen">
+        <Header />
       
       <main className="pt-24 pb-20">
         <div className="container mx-auto px-4">
@@ -131,10 +148,11 @@ const About = () => {
             </div>
           </div>
         </div>
-      </main>
-      
-      <Footer />
-    </div>
+        </main>
+        
+        <Footer />
+      </div>
+    </>
   );
 };
 

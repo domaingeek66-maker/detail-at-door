@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { SEO } from "@/components/SEO";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -392,8 +393,14 @@ const Booking = () => {
 
   if (step === 5) {
     return (
-      <div className="min-h-screen">
-        <Header />
+      <>
+        <SEO 
+          title="Afspraak Bevestigd - Bedankt voor Uw Boeking"
+          description="Uw car detailing afspraak is succesvol bevestigd. U ontvangt een bevestiging via WhatsApp."
+          url="https://cardetail-exclusief.nl/boeking"
+        />
+        <div className="min-h-screen">
+          <Header />
         <main className="pt-24 pb-20">
           <div className="container mx-auto px-4">
             <div className="max-w-2xl mx-auto text-center">
@@ -427,12 +434,20 @@ const Booking = () => {
         </main>
         <Footer />
       </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen">
-      <Header />
+    <>
+      <SEO 
+        title="Boek Een Afspraak - Plan Direct Uw Car Detailing"
+        description="Plan uw car detailing afspraak aan huis in enkele stappen. Kies uw dienst, datum en locatie. Direct online boeken met WhatsApp bevestiging."
+        keywords="car detailing boeken, afspraak maken, online booking, mobiel car wash"
+        url="https://cardetail-exclusief.nl/boeking"
+      />
+      <div className="min-h-screen">
+        <Header />
       
       <main className="pt-24 pb-20">
         <div className="container mx-auto px-4">
@@ -881,10 +896,11 @@ const Booking = () => {
             )}
           </div>
         </div>
-      </main>
-      
-      <Footer />
-    </div>
+        </main>
+        
+        <Footer />
+      </div>
+    </>
   );
 };
 

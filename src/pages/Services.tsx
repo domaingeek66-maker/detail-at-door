@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Sparkles, Clock, Euro } from "lucide-react";
+import { SEO } from "@/components/SEO";
 import exteriorImage from "@/assets/service-exterior.jpg";
 import interiorImage from "@/assets/service-interior.jpg";
 import coatingImage from "@/assets/service-coating.jpg";
@@ -31,11 +32,42 @@ const Services = () => {
     },
   });
 
+  const structuredData = services ? {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": services.map((service, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "item": {
+        "@type": "Service",
+        "name": service.name,
+        "description": service.description,
+        "provider": {
+          "@type": "LocalBusiness",
+          "name": "Cardetail Exclusief"
+        },
+        "offers": {
+          "@type": "Offer",
+          "price": service.price.toString(),
+          "priceCurrency": "EUR"
+        }
+      }
+    }))
+  } : undefined;
+
   return (
-    <div className="min-h-screen">
-      <Header />
+    <>
+      <SEO
+        title="Onze Diensten - Premium Car Detailing Behandelingen"
+        description="Bekijk onze professionele car detailing diensten aan huis: exterieur reiniging, interieur behandeling en ceramic coating. Transparante prijzen."
+        keywords="car detailing diensten, auto poetsen, ceramic coating, interieur reiniging, exterieur behandeling, mobiel car detailing"
+        url="https://cardetail-exclusief.nl/diensten"
+        structuredData={structuredData}
+      />
+      <div className="min-h-screen">
+        <Header />
       
-      <main className="pt-24 pb-20">
+        <main className="pt-24 pb-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
@@ -62,8 +94,9 @@ const Services = () => {
                   <div className="relative h-64 overflow-hidden">
                     <img 
                       src={serviceImages[service.name] || exteriorImage}
-                      alt={service.name}
+                      alt={`${service.name} - Professionele car detailing service aan huis`}
                       className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
+                      loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-background/90 to-transparent" />
                     <div className="absolute bottom-4 left-4 right-4">
@@ -114,10 +147,11 @@ const Services = () => {
             </Link>
           </div>
         </div>
-      </main>
-      
-      <Footer />
-    </div>
+        </main>
+        
+        <Footer />
+      </div>
+    </>
   );
 };
 

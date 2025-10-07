@@ -29,7 +29,7 @@ export const ServicesSection = () => {
   });
 
   return (
-    <section className="py-12 sm:py-16 md:py-20 px-4">
+    <section id="diensten" className="py-12 sm:py-16 md:py-20 px-4" aria-label="Onze diensten">
       <div className="container mx-auto">
         <div className="text-center mb-8 sm:mb-12">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
@@ -56,8 +56,9 @@ export const ServicesSection = () => {
                 <div className="relative h-48 overflow-hidden">
                   <img 
                     src={serviceImages[service.name] || exteriorImage}
-                    alt={service.name}
+                    alt={`${service.name} - Cardetail Exclusief professionele behandeling`}
                     className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
+                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
                 </div>

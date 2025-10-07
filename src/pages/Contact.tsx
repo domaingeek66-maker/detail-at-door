@@ -3,8 +3,10 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { MessageCircle, Mail, Phone, MapPin, Clock, Loader2 } from "lucide-react";
+import { MessageCircle, Mail, Phone, MapPin, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { SEO } from "@/components/SEO";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 interface OpeningHour {
   day: string;
@@ -52,18 +54,34 @@ const Contact = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen">
-        <Header />
-        <main className="pt-24 pb-20 flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </main>
-        <Footer />
-      </div>
+      <>
+        <SEO 
+          title="Contact - Neem Contact Op voor Car Detailing"
+          description="Neem contact op met Cardetail Exclusief voor vragen of afspraken. Bereikbaar via WhatsApp, telefoon en e-mail. Landelijk actief."
+          keywords="contact, car detailing contact, afspraak maken, whatsapp booking"
+          url="https://cardetail-exclusief.nl/contact"
+        />
+        <div className="min-h-screen">
+          <Header />
+          <main className="pt-24 pb-20 flex items-center justify-center">
+            <LoadingSpinner />
+          </main>
+          <Footer />
+        </div>
+      </>
     );
   }
+  
   return (
-    <div className="min-h-screen">
-      <Header />
+    <>
+      <SEO 
+        title="Contact - Neem Contact Op voor Car Detailing"
+        description="Neem contact op met Cardetail Exclusief voor vragen of afspraken. Bereikbaar via WhatsApp, telefoon en e-mail. Landelijk actief."
+        keywords="contact, car detailing contact, afspraak maken, whatsapp booking"
+        url="https://cardetail-exclusief.nl/contact"
+      />
+      <div className="min-h-screen">
+        <Header />
       
       <main className="pt-24 pb-20">
         <div className="container mx-auto px-4">
@@ -191,10 +209,11 @@ const Contact = () => {
             </div>
           </div>
         </div>
-      </main>
-      
-      <Footer />
-    </div>
+        </main>
+        
+        <Footer />
+      </div>
+    </>
   );
 };
 

@@ -5,7 +5,7 @@ import heroImage from "@/assets/hero-detailing.jpg";
 
 export const Hero = () => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden" aria-label="Hero sectie">
       <div 
         className="absolute inset-0 z-0"
         style={{
@@ -20,8 +20,8 @@ export const Hero = () => {
       <div className="container mx-auto px-4 relative z-10 pt-20 pb-10">
         <div className="max-w-4xl mx-auto text-center space-y-6 sm:space-y-8">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold leading-tight">
-            Exclusieve Car Detailing{" "}
-            <span className="text-primary">bij u aan huis</span>
+            Exclusieve Car Detailing aan Huis{" "}
+            <span className="text-primary">Nederland</span>
           </h1>
           
           <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-2xl mx-auto px-4">

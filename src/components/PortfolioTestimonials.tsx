@@ -33,6 +33,33 @@ export const PortfolioTestimonials = () => {
     setLoading(false);
   };
 
+  // Generate structured data for reviews
+  const reviewsStructuredData = items.length > 0 ? {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": items.map((item, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "item": {
+        "@type": "Review",
+        "author": {
+          "@type": "Person",
+          "name": item.customer_name
+        },
+        "reviewBody": item.review,
+        "reviewRating": {
+          "@type": "Rating",
+          "ratingValue": item.rating.toString(),
+          "bestRating": "5"
+        },
+        "itemReviewed": {
+          "@type": "Service",
+          "name": item.title
+        }
+      }
+    }))
+  } : null;
+
   if (loading) {
     return (
       <section className="py-20 bg-gradient-to-b from-background to-muted/20">
@@ -42,8 +69,15 @@ export const PortfolioTestimonials = () => {
       </section>
     );
   }
+
   return (
-    <section className="py-20 bg-gradient-to-b from-background to-muted/20">
+    <>
+      {reviewsStructuredData && (
+        <script type="application/ld+json">
+          {JSON.stringify(reviewsStructuredData)}
+        </script>
+      )}
+      <section className="py-20 bg-gradient-to-b from-background to-muted/20" aria-label="Portfolio en klantbeoordelingen">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold mb-4 text-foreground">
@@ -92,7 +126,8 @@ export const PortfolioTestimonials = () => {
             </Card>
           ))}
         </div>
-      </div>
-    </section>
+        </div>
+      </section>
+    </>
   );
 };

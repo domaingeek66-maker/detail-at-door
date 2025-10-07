@@ -2,9 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { SEO } from "@/components/SEO";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 interface BlogPost {
   id: string;
@@ -32,9 +33,16 @@ const Blog = () => {
   });
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <main className="flex-1">
+    <>
+      <SEO 
+        title="Blog - Tips en Nieuws over Car Detailing"
+        description="Lees onze blog voor tips, nieuws en updates over professionele car detailing. Leer hoe u uw auto perfect kunt onderhouden."
+        keywords="car detailing blog, auto onderhoud tips, detailing nieuws, autopflege"
+        url="https://cardetail-exclusief.nl/blog"
+      />
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1">
         <section className="py-16 md:py-24">
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center mb-12">
@@ -45,9 +53,7 @@ const Blog = () => {
             </div>
 
             {isLoading ? (
-              <div className="flex justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin" />
-              </div>
+              <LoadingSpinner />
             ) : posts && posts.length > 0 ? (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
                 {posts.map((post) => (
@@ -90,9 +96,10 @@ const Blog = () => {
             )}
           </div>
         </section>
-      </main>
-      <Footer />
-    </div>
+        </main>
+        <Footer />
+      </div>
+    </>
   );
 };
 
