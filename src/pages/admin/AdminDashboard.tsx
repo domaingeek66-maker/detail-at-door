@@ -554,8 +554,8 @@ export default function AdminDashboard() {
             {upcomingAppointments.map((appointment) => (
               <Card key={appointment.id} className="bg-card">
                 <CardContent className="p-4">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-4 flex-1">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 flex-1">
                       <div className="flex items-center gap-2">
                         <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                         <span className="font-medium">
@@ -581,7 +581,7 @@ export default function AdminDashboard() {
                         <span>{appointment.city}</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                       {getStatusBadge(appointment.status)}
                       <Button
                         variant="outline"
