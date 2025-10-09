@@ -252,7 +252,7 @@ export default function AdminDashboard() {
   const openInMaps = (appointment: Appointment) => {
     const parts = [appointment.street_address, appointment.city].filter(Boolean);
     const destination = encodeURIComponent(parts.join(", "));
-    window.open(`https://maps.apple.com/directions?destination=${destination}`, "_blank");
+    window.location.href = `maps:?daddr=${destination}`;
   };
 
   const calculateRevenue = () => {
