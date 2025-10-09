@@ -250,10 +250,10 @@ export default function AdminDashboard() {
     });
 
   const openInMaps = (appointment: Appointment) => {
-    const address = encodeURIComponent(
-      `${appointment.street_address}, ${appointment.postal_code} ${appointment.city}`
-    );
-    window.open(`https://maps.apple.com/?address=${address}`, '_blank');
+    const fullAddress = `${appointment.street_address}, ${appointment.postal_code} ${appointment.city}`;
+    const addressParam = encodeURIComponent(fullAddress);
+    const nameParam = encodeURIComponent(appointment.street_address);
+    window.open(`https://maps.apple.com/place?address=${addressParam}&name=${nameParam}`, '_blank');
   };
 
   const calculateRevenue = () => {
