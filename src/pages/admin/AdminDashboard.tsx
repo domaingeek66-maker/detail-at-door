@@ -250,9 +250,9 @@ export default function AdminDashboard() {
     });
 
   const openInMaps = (appointment: Appointment) => {
-    const parts = [appointment.street_address, appointment.postal_code, appointment.city, "Nederland"].filter(Boolean);
-    const query = encodeURIComponent(parts.join(", "));
-    window.open(`https://maps.apple.com/?q=${query}`, "_blank");
+    const parts = [appointment.street_address, appointment.city].filter(Boolean);
+    const address = encodeURIComponent(parts.join(", "));
+    window.open(`https://maps.apple.com/?daddr=${address}`, "_blank");
   };
 
   const calculateRevenue = () => {
