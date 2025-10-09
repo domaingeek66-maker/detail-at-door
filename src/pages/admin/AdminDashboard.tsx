@@ -256,7 +256,15 @@ export default function AdminDashboard() {
   };
 
   const openWhatsApp = (phone: string) => {
-    const cleanPhone = phone.replace(/\s+/g, '').replace(/^\+/, '');
+    let cleanPhone = phone.replace(/\s+/g, '');
+    
+    // Convert Dutch mobile numbers to international format
+    if (cleanPhone.startsWith('06')) {
+      cleanPhone = '+316' + cleanPhone.substring(2);
+    } else if (cleanPhone.startsWith('31') && !cleanPhone.startsWith('+')) {
+      cleanPhone = '+' + cleanPhone;
+    }
+    
     window.location.href = `https://wa.me/${cleanPhone}`;
   };
 
