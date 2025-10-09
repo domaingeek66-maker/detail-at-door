@@ -33,7 +33,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { format, startOfWeek, startOfMonth, startOfYear, isAfter } from "date-fns";
 import { nl } from "date-fns/locale";
-import { Trash2, FileText, Calendar as CalendarIcon, Clock, User, Car, Search, Euro, Users, CheckCircle2, AlertTriangle, Download } from "lucide-react";
+import { Trash2, FileText, Calendar as CalendarIcon, Clock, User, Car, Search, Euro, Users, CheckCircle2, AlertTriangle, Download, MapPin } from "lucide-react";
 import { InvoiceDialog } from "@/components/admin/InvoiceDialog";
 import { Input } from "@/components/ui/input";
 
@@ -236,6 +236,25 @@ export default function AdminDashboard() {
       appointment.status.toLowerCase().includes(query)
     );
   });
+
+  const upcomingAppointments = appointments
+    .filter((appointment) => {
+      const appointmentDateTime = new Date(`${appointment.appointment_date}T${appointment.appointment_time}`);
+      const now = new Date();
+      return appointmentDateTime >= now && appointment.status !== "cancelled";
+    })
+    .sort((a, b) => {
+      const dateA = new Date(`${a.appointment_date}T${a.appointment_time}`);
+      const dateB = new Date(`${b.appointment_date}T${b.appointment_time}`);
+      return dateA.getTime() - dateB.getTime();
+    });
+
+  const openInMaps = (appointment: Appointment) => {
+    const address = encodeURIComponent(
+      `${appointment.street_address}, ${appointment.postal_code} ${appointment.city}`
+    );
+    window.open(`https://maps.apple.com/?address=${address}`, '_blank');
+  };
 
   const calculateRevenue = () => {
     return filteredAppointmentsByPeriod.reduce((total, appointment) => {
@@ -528,8 +547,62 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
+      {upcomingAppointments.length > 0 && (
+        <div className="mb-8">
+          <h3 className="text-xl font-semibold mb-4">Aankomende Afspraken</h3>
+          <div className="space-y-3">
+            {upcomingAppointments.map((appointment) => (
+              <Card key={appointment.id} className="bg-card">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-4 flex-1">
+                      <div className="flex items-center gap-2">
+                        <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">
+                          {format(new Date(appointment.appointment_date), "EEE dd MMM", { locale: nl })}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">{appointment.appointment_time.substring(0, 5)}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">{appointment.customers.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Car className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">
+                          {appointment.vehicle_make} {appointment.vehicle_model}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <MapPin className="h-4 w-4" />
+                        <span>{appointment.city}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {getStatusBadge(appointment.status)}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openInMaps(appointment)}
+                        className="whitespace-nowrap"
+                      >
+                        <MapPin className="h-4 w-4 mr-2" />
+                        Open Maps
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="mb-4">
-        <h3 className="text-xl font-semibold mb-2">Afspraken</h3>
+        <h3 className="text-xl font-semibold mb-2">Alle Afspraken</h3>
       </div>
 
       <div className="mb-6">
