@@ -251,8 +251,8 @@ export default function AdminDashboard() {
 
   const openInMaps = (appointment: Appointment) => {
     const parts = [appointment.street_address, appointment.city].filter(Boolean);
-    const address = encodeURIComponent(parts.join(", "));
-    window.open(`https://maps.apple.com/?daddr=${address}`, "_blank");
+    const destination = encodeURIComponent(parts.join(", "));
+    window.open(`https://maps.apple.com/directions?destination=${destination}`, "_blank");
   };
 
   const calculateRevenue = () => {
