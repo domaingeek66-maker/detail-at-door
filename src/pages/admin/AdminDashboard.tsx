@@ -33,7 +33,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { format, startOfWeek, startOfMonth, startOfYear, isAfter } from "date-fns";
 import { nl } from "date-fns/locale";
-import { Trash2, FileText, Calendar as CalendarIcon, Clock, User, Car, Search, Euro, Users, CheckCircle2, AlertTriangle, Download, MapPin } from "lucide-react";
+import { Trash2, FileText, Calendar as CalendarIcon, Clock, User, Car, Search, Euro, Users, CheckCircle2, AlertTriangle, Download, MapPin, MessageCircle } from "lucide-react";
 import { InvoiceDialog } from "@/components/admin/InvoiceDialog";
 import { Input } from "@/components/ui/input";
 
@@ -253,6 +253,11 @@ export default function AdminDashboard() {
     const parts = [appointment.street_address, appointment.city].filter(Boolean);
     const destination = encodeURIComponent(parts.join(", "));
     window.location.href = `maps:?daddr=${destination}`;
+  };
+
+  const openWhatsApp = (phone: string) => {
+    const cleanPhone = phone.replace(/\s+/g, '').replace(/^\+/, '');
+    window.location.href = `https://wa.me/${cleanPhone}`;
   };
 
   const calculateRevenue = () => {
@@ -582,6 +587,15 @@ export default function AdminDashboard() {
                     </div>
                     <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
                       {getStatusBadge(appointment.status)}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openWhatsApp(appointment.customers.phone)}
+                        className="whitespace-nowrap"
+                      >
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                        WhatsApp
+                      </Button>
                       <Button
                         variant="outline"
                         size="sm"
