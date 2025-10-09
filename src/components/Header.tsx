@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Car } from "lucide-react";
 import { MobileMenu } from "./MobileMenu";
+import logoIcon from "@/assets/logo-icon.png";
 
 export const Header = () => {
   return (
@@ -13,7 +13,11 @@ export const Header = () => {
             className="flex items-center gap-2 lg:gap-3 group transition-smooth hover:scale-105"
           >
             <div className="relative">
-              <Car className="w-7 h-7 lg:w-9 lg:h-9 text-primary transition-smooth group-hover:text-primary-glow" />
+              <img 
+                src={logoIcon} 
+                alt="Cardetail Exclusief Logo" 
+                className="w-7 h-7 lg:w-9 lg:h-9 transition-smooth group-hover:brightness-110" 
+              />
               <div className="absolute inset-0 bg-primary/20 blur-lg opacity-0 group-hover:opacity-100 transition-smooth" />
             </div>
             <span className="text-lg lg:text-xl font-bold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
