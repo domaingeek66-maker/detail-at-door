@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut, Calendar, Users, Settings, Clock, Menu, FileText, Phone, BookOpen, Image, Briefcase, Send, Tag } from "lucide-react";
+import { LogOut, Calendar, Users, Settings, Clock, Menu, FileText, Phone, BookOpen, Image, Briefcase, Send, Tag, ImagePlus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Sheet,
@@ -176,6 +176,15 @@ export default function AdminLayout() {
                       Kortingscodes
                     </Button>
                   </Link>
+                  <Link to="/admin/before-after" onClick={() => setMobileMenuOpen(false)}>
+                    <Button
+                      variant={isActive("/admin/before-after") ? "default" : "ghost"}
+                      className="w-full justify-start"
+                    >
+                      <ImagePlus className="mr-2 h-4 w-4" />
+                      Voor & Na
+                    </Button>
+                  </Link>
                   <Link to="/admin/settings" onClick={() => setMobileMenuOpen(false)}>
                     <Button
                       variant={isActive("/admin/settings") ? "default" : "ghost"}
@@ -291,6 +300,15 @@ export default function AdminLayout() {
               >
                 <Tag className="mr-2 h-4 w-4" />
                 Kortingscodes
+              </Button>
+            </Link>
+            <Link to="/admin/before-after">
+              <Button
+                variant={isActive("/admin/before-after") ? "default" : "ghost"}
+                className="w-full justify-start"
+              >
+                <ImagePlus className="mr-2 h-4 w-4" />
+                Voor & Na
               </Button>
             </Link>
             <Link to="/admin/settings">
