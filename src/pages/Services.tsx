@@ -10,11 +10,13 @@ import { SEO } from "@/components/SEO";
 import exteriorImage from "@/assets/service-exterior.jpg";
 import interiorImage from "@/assets/service-interior.jpg";
 import coatingImage from "@/assets/service-coating.jpg";
+import seatCleaningImage from "@/assets/service-seat-cleaning.jpg";
 
 const serviceImages: Record<string, string> = {
   "Exterior & Velgen": exteriorImage,
   "Interieur + Exterieur Pakket": interiorImage,
   "Ceramic & Wax Coating": coatingImage,
+  "Stoelreiniging": seatCleaningImage,
 };
 
 const Services = () => {
