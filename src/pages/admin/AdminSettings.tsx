@@ -76,12 +76,10 @@ export default function AdminSettings() {
 
   const getSettingLabel = (key: string) => {
     const labels: Record<string, string> = {
-      RESEND_API_KEY: "Resend API Key",
-      WHATSAPP_ACCESS_TOKEN: "WhatsApp Access Token",
-      WHATSAPP_PHONE_NUMBER_ID: "WhatsApp Phone Number ID",
-      WHATSAPP_BUSINESS_ACCOUNT_ID: "WhatsApp Business Account ID",
       gmail_user: "Gmail E-mailadres",
-      gmail_app_password: "Gmail App-specifiek Wachtwoord",
+      gmail_client_id: "Gmail OAuth Client ID",
+      gmail_client_secret: "Gmail OAuth Client Secret",
+      gmail_refresh_token: "Gmail OAuth Refresh Token",
       service_area_lat: "Startlocatie Breedtegraad",
       service_area_lng: "Startlocatie Lengtegraad",
       service_area_radius_km: "Servicegebied Radius (km)",
@@ -98,7 +96,7 @@ export default function AdminSettings() {
   };
 
   const getSettingType = (key: string) => {
-    if (key.includes('API') || key.includes('TOKEN') || key.includes('ACCOUNT') || key.includes('password')) {
+    if (key.includes('secret') || key.includes('token') || key.includes('password')) {
       return 'password';
     }
     return 'text';
@@ -236,30 +234,32 @@ export default function AdminSettings() {
           </div>
 
           <div className="bg-muted/50 rounded-lg p-3 sm:p-4">
-            <h3 className="font-semibold mb-2 text-sm sm:text-base">📚 API Keys verkrijgen:</h3>
-            <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground">
+            <h3 className="font-semibold mb-2 text-sm sm:text-base">📚 Gmail OAuth instellen:</h3>
+            <ol className="space-y-2 text-xs sm:text-sm text-muted-foreground list-decimal list-inside">
               <li>
-                <strong>Gmail App Wachtwoord:</strong> Ga naar{" "}
-                <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                  Google App Wachtwoorden
+                Ga naar{" "}
+                <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                  Google Cloud Console
                 </a>
-                {" "}en maak een app-specifiek wachtwoord aan voor 'Mail'
+                {" "}en maak een OAuth 2.0 Client ID aan (Web application)
               </li>
               <li>
-                <strong>Resend:</strong> Maak een account op{" "}
-                <a href="https://resend.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                  resend.com
-                </a>
-                {" "}en maak een API key aan
+                Voeg <code className="bg-background px-1 rounded">http://localhost</code> toe aan Authorized redirect URIs
               </li>
               <li>
-                <strong>WhatsApp:</strong> Registreer je app op{" "}
-                <a href="https://developers.facebook.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-                  Meta Developers
-                </a>
-                {" "}en voeg WhatsApp toe
+                Kopieer Client ID en Client Secret naar de velden hierboven
               </li>
-            </ul>
+              <li>
+                Gebruik{" "}
+                <a href="https://developers.google.com/oauthplayground" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                  OAuth 2.0 Playground
+                </a>
+                {" "}met scope <code className="bg-background px-1 rounded">https://www.googleapis.com/auth/gmail.send</code> om een Refresh Token te verkrijgen
+              </li>
+              <li>
+                Plak de Refresh Token in het veld hierboven
+              </li>
+            </ol>
           </div>
         </div>
       </div>
