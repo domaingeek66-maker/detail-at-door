@@ -41,15 +41,15 @@ export const Footer = () => {
             <h3 className="font-semibold mb-4">Contact</h3>
             <ul className="space-y-3 text-sm text-muted-foreground">
               <li className="flex items-center gap-2">
-                <Phone className="w-4 h-4 text-primary" />
+                <Phone className="w-4 h-4 text-primary shrink-0" />
                 <a href="tel:+31612345678" className="hover:text-primary transition-smooth">+31 6 12345678</a>
               </li>
               <li className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-primary" />
-                <a href="mailto:info@cardetail-exclusief.nl" className="hover:text-primary transition-smooth">info@cardetail-exclusief.nl</a>
+                <Mail className="w-4 h-4 text-primary shrink-0" />
+                <a href="mailto:cardetail.exclusief@gmail.com" className="hover:text-primary transition-smooth">cardetail.exclusief@gmail.com</a>
               </li>
               <li className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-primary" />
+                <MapPin className="w-4 h-4 text-primary shrink-0" />
                 <span>Landelijk actief</span>
               </li>
             </ul>
