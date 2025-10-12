@@ -80,6 +80,8 @@ export default function AdminSettings() {
       WHATSAPP_ACCESS_TOKEN: "WhatsApp Access Token",
       WHATSAPP_PHONE_NUMBER_ID: "WhatsApp Phone Number ID",
       WHATSAPP_BUSINESS_ACCOUNT_ID: "WhatsApp Business Account ID",
+      gmail_user: "Gmail E-mailadres",
+      gmail_app_password: "Gmail App-specifiek Wachtwoord",
       service_area_lat: "Startlocatie Breedtegraad",
       service_area_lng: "Startlocatie Lengtegraad",
       service_area_radius_km: "Servicegebied Radius (km)",
@@ -96,7 +98,7 @@ export default function AdminSettings() {
   };
 
   const getSettingType = (key: string) => {
-    if (key.includes('API') || key.includes('TOKEN') || key.includes('ACCOUNT')) {
+    if (key.includes('API') || key.includes('TOKEN') || key.includes('ACCOUNT') || key.includes('password')) {
       return 'password';
     }
     return 'text';
@@ -236,6 +238,13 @@ export default function AdminSettings() {
           <div className="bg-muted/50 rounded-lg p-3 sm:p-4">
             <h3 className="font-semibold mb-2 text-sm sm:text-base">📚 API Keys verkrijgen:</h3>
             <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground">
+              <li>
+                <strong>Gmail App Wachtwoord:</strong> Ga naar{" "}
+                <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                  Google App Wachtwoorden
+                </a>
+                {" "}en maak een app-specifiek wachtwoord aan voor 'Mail'
+              </li>
               <li>
                 <strong>Resend:</strong> Maak een account op{" "}
                 <a href="https://resend.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
