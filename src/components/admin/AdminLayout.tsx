@@ -214,116 +214,120 @@ export default function AdminLayout() {
       <div className="container mx-auto px-4 py-4 sm:py-8">
         <div className="flex gap-4 sm:gap-8">
           {/* Desktop Sidebar */}
-          <nav className="hidden lg:block w-64 space-y-2 shrink-0">
-            <Link to="/admin/dashboard">
-              <Button
-                variant={isActive("/admin/dashboard") ? "default" : "ghost"}
-                className="w-full justify-start"
-              >
-                <Calendar className="mr-2 h-4 w-4" />
-                Afspraken
-              </Button>
-            </Link>
-            <Link to="/admin/customers">
-              <Button
-                variant={isActive("/admin/customers") ? "default" : "ghost"}
-                className="w-full justify-start"
-              >
-                <Users className="mr-2 h-4 w-4" />
-                Klanten
-              </Button>
-            </Link>
-            <Link to="/admin/services">
-              <Button
-                variant={isActive("/admin/services") ? "default" : "ghost"}
-                className="w-full justify-start"
-              >
-                <Briefcase className="mr-2 h-4 w-4" />
-                Diensten
-              </Button>
-            </Link>
-            <Link to="/admin/availability">
-              <Button
-                variant={isActive("/admin/availability") ? "default" : "ghost"}
-                className="w-full justify-start"
-              >
-                <Clock className="mr-2 h-4 w-4" />
-                Beschikbaarheid
-              </Button>
-            </Link>
-            <Link to="/admin/blog-posts">
-              <Button
-                variant={isActive("/admin/blog-posts") ? "default" : "ghost"}
-                className="w-full justify-start"
-              >
-                <BookOpen className="mr-2 h-4 w-4" />
-                Blog Posts
-              </Button>
-            </Link>
-            <Link to="/admin/portfolio">
-              <Button
-                variant={isActive("/admin/portfolio") ? "default" : "ghost"}
-                className="w-full justify-start"
-              >
-                <Image className="mr-2 h-4 w-4" />
-                Portfolio
-              </Button>
-            </Link>
-            <Link to="/admin/about">
-              <Button
-                variant={isActive("/admin/about") ? "default" : "ghost"}
-                className="w-full justify-start"
-              >
-                <FileText className="mr-2 h-4 w-4" />
-                Over Ons
-              </Button>
-            </Link>
-            <Link to="/admin/contact">
-              <Button
-                variant={isActive("/admin/contact") ? "default" : "ghost"}
-                className="w-full justify-start"
-              >
-                <Phone className="mr-2 h-4 w-4" />
-                Contact
-              </Button>
-            </Link>
-            <Link to="/admin/broadcast">
-              <Button
-                variant={isActive("/admin/broadcast") ? "default" : "ghost"}
-                className="w-full justify-start"
-              >
-                <Send className="mr-2 h-4 w-4" />
-                WhatsApp Broadcast
-              </Button>
-            </Link>
-            <Link to="/admin/discounts">
-              <Button
-                variant={isActive("/admin/discounts") ? "default" : "ghost"}
-                className="w-full justify-start"
-              >
-                <Tag className="mr-2 h-4 w-4" />
-                Kortingscodes
-              </Button>
-            </Link>
-            <Link to="/admin/before-after">
-              <Button
-                variant={isActive("/admin/before-after") ? "default" : "ghost"}
-                className="w-full justify-start"
-              >
-                <ImagePlus className="mr-2 h-4 w-4" />
-                Voor & Na
-              </Button>
-            </Link>
-            <Link to="/admin/settings">
-              <Button
-                variant={isActive("/admin/settings") ? "default" : "ghost"}
-                className="w-full justify-start"
-              >
-                <Settings className="mr-2 h-4 w-4" />
-                Instellingen
-              </Button>
-            </Link>
-          </nav>
+          <div className="hidden lg:block w-64 shrink-0">
+            <ScrollArea className="h-[calc(100vh-80px)] pr-2">
+              <nav className="flex flex-col gap-2">
+                <Link to="/admin/dashboard">
+                  <Button
+                    variant={isActive("/admin/dashboard") ? "default" : "ghost"}
+                    className="w-full justify-start"
+                  >
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Afspraken
+                  </Button>
+                </Link>
+                <Link to="/admin/customers">
+                  <Button
+                    variant={isActive("/admin/customers") ? "default" : "ghost"}
+                    className="w-full justify-start"
+                  >
+                    <Users className="mr-2 h-4 w-4" />
+                    Klanten
+                  </Button>
+                </Link>
+                <Link to="/admin/services">
+                  <Button
+                    variant={isActive("/admin/services") ? "default" : "ghost"}
+                    className="w-full justify-start"
+                  >
+                    <Briefcase className="mr-2 h-4 w-4" />
+                    Diensten
+                  </Button>
+                </Link>
+                <Link to="/admin/availability">
+                  <Button
+                    variant={isActive("/admin/availability") ? "default" : "ghost"}
+                    className="w-full justify-start"
+                  >
+                    <Clock className="mr-2 h-4 w-4" />
+                    Beschikbaarheid
+                  </Button>
+                </Link>
+                <Link to="/admin/blog-posts">
+                  <Button
+                    variant={isActive("/admin/blog-posts") ? "default" : "ghost"}
+                    className="w-full justify-start"
+                  >
+                    <BookOpen className="mr-2 h-4 w-4" />
+                    Blog Posts
+                  </Button>
+                </Link>
+                <Link to="/admin/portfolio">
+                  <Button
+                    variant={isActive("/admin/portfolio") ? "default" : "ghost"}
+                    className="w-full justify-start"
+                  >
+                    <Image className="mr-2 h-4 w-4" />
+                    Portfolio
+                  </Button>
+                </Link>
+                <Link to="/admin/about">
+                  <Button
+                    variant={isActive("/admin/about") ? "default" : "ghost"}
+                    className="w-full justify-start"
+                  >
+                    <FileText className="mr-2 h-4 w-4" />
+                    Over Ons
+                  </Button>
+                </Link>
+                <Link to="/admin/contact">
+                  <Button
+                    variant={isActive("/admin/contact") ? "default" : "ghost"}
+                    className="w-full justify-start"
+                  >
+                    <Phone className="mr-2 h-4 w-4" />
+                    Contact
+                  </Button>
+                </Link>
+                <Link to="/admin/broadcast">
+                  <Button
+                    variant={isActive("/admin/broadcast") ? "default" : "ghost"}
+                    className="w-full justify-start"
+                  >
+                    <Send className="mr-2 h-4 w-4" />
+                    WhatsApp Broadcast
+                  </Button>
+                </Link>
+                <Link to="/admin/discounts">
+                  <Button
+                    variant={isActive("/admin/discounts") ? "default" : "ghost"}
+                    className="w-full justify-start"
+                  >
+                    <Tag className="mr-2 h-4 w-4" />
+                    Kortingscodes
+                  </Button>
+                </Link>
+                <Link to="/admin/before-after">
+                  <Button
+                    variant={isActive("/admin/before-after") ? "default" : "ghost"}
+                    className="w-full justify-start"
+                  >
+                    <ImagePlus className="mr-2 h-4 w-4" />
+                    Voor & Na
+                  </Button>
+                </Link>
+                <Link to="/admin/settings">
+                  <Button
+                    variant={isActive("/admin/settings") ? "default" : "ghost"}
+                    className="w-full justify-start"
+                  >
+                    <Settings className="mr-2 h-4 w-4" />
+                    Instellingen
+                  </Button>
+                </Link>
+              </nav>
+            </ScrollArea>
+          </div>
 
 
           <main className="flex-1 min-w-0">
