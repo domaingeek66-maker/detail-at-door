@@ -4,7 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Save } from "lucide-react";
+import { Save, UserPlus, Trash2, Mail, Lock } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Setting {
   key: string;
@@ -16,10 +27,18 @@ export default function AdminSettings() {
   const [settings, setSettings] = useState<Setting[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [admins, setAdmins] = useState<any[]>([]);
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [adminToDelete, setAdminToDelete] = useState<string | null>(null);
+  const [updatingAuth, setUpdatingAuth] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchSettings();
+    fetchAdmins();
   }, []);
 
   const fetchSettings = async () => {
@@ -39,6 +58,168 @@ export default function AdminSettings() {
 
     setSettings(data || []);
     setLoading(false);
+  };
+
+  const fetchAdmins = async () => {
+    const { data, error } = await supabase
+      .from("user_roles")
+      .select("user_id")
+      .eq("role", "admin");
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Fout bij ophalen admins",
+        description: error.message,
+      });
+      return;
+    }
+
+    setAdmins(data || []);
+  };
+
+  const updateEmail = async () => {
+    if (!newEmail.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Fout",
+        description: "Vul een geldig e-mailadres in",
+      });
+      return;
+    }
+
+    setUpdatingAuth(true);
+    const { error } = await supabase.auth.updateUser({
+      email: newEmail,
+    });
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Fout bij wijzigen email",
+        description: error.message,
+      });
+    } else {
+      toast({
+        title: "Email gewijzigd",
+        description: "Controleer je nieuwe email voor bevestiging",
+      });
+      setNewEmail("");
+    }
+    setUpdatingAuth(false);
+  };
+
+  const updatePassword = async () => {
+    if (!currentPassword || !confirmPassword) {
+      toast({
+        variant: "destructive",
+        title: "Fout",
+        description: "Vul alle wachtwoordvelden in",
+      });
+      return;
+    }
+
+    if (currentPassword !== confirmPassword) {
+      toast({
+        variant: "destructive",
+        title: "Fout",
+        description: "Wachtwoorden komen niet overeen",
+      });
+      return;
+    }
+
+    if (currentPassword.length < 6) {
+      toast({
+        variant: "destructive",
+        title: "Fout",
+        description: "Wachtwoord moet minimaal 6 tekens lang zijn",
+      });
+      return;
+    }
+
+    setUpdatingAuth(true);
+    const { error } = await supabase.auth.updateUser({
+      password: currentPassword,
+    });
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Fout bij wijzigen wachtwoord",
+        description: error.message,
+      });
+    } else {
+      toast({
+        title: "Wachtwoord gewijzigd",
+        description: "Je wachtwoord is succesvol gewijzigd",
+      });
+      setCurrentPassword("");
+      setConfirmPassword("");
+    }
+    setUpdatingAuth(false);
+  };
+
+  const addAdminRole = async (userId: string) => {
+    if (!userId.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Fout",
+        description: "Voer een geldig user ID in",
+      });
+      return;
+    }
+
+    // Add admin role
+    const { error } = await supabase
+      .from("user_roles")
+      .insert({ user_id: userId, role: "admin" });
+
+    if (error) {
+      if (error.code === "23505") {
+        toast({
+          variant: "destructive",
+          title: "Al admin",
+          description: "Deze gebruiker heeft al admin rechten",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Fout bij toevoegen admin",
+          description: error.message,
+        });
+      }
+      return;
+    }
+
+    toast({
+      title: "Admin toegevoegd",
+      description: "Admin rechten zijn toegekend",
+    });
+    fetchAdmins();
+  };
+
+  const removeAdminRole = async (userId: string) => {
+    const { error } = await supabase
+      .from("user_roles")
+      .delete()
+      .eq("user_id", userId)
+      .eq("role", "admin");
+
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Fout bij verwijderen",
+        description: error.message,
+      });
+      return;
+    }
+
+    toast({
+      title: "Admin verwijderd",
+      description: "Admin rechten zijn verwijderd",
+    });
+    fetchAdmins();
+    setAdminToDelete(null);
   };
 
   const handleValueChange = (key: string, value: string) => {
@@ -122,6 +303,150 @@ export default function AdminSettings() {
 
   return (
     <div className="space-y-6">
+      {/* Admin Account Beheer */}
+      <div>
+        <div className="mb-6">
+          <h2 className="text-2xl sm:text-3xl font-bold">Account Beheer</h2>
+          <p className="text-sm sm:text-base text-muted-foreground mt-2">
+            Wijzig je login gegevens en beheer admin accounts
+          </p>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2">
+          {/* Email wijzigen */}
+          <Card className="p-4 sm:p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <Mail className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold">E-mailadres wijzigen</h3>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-email">Nieuw e-mailadres</Label>
+              <Input
+                id="new-email"
+                type="email"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                placeholder="nieuw@email.com"
+              />
+            </div>
+            <Button 
+              onClick={updateEmail} 
+              disabled={updatingAuth || !newEmail}
+              className="w-full"
+            >
+              <Mail className="mr-2 h-4 w-4" />
+              {updatingAuth ? "Bezig..." : "Email wijzigen"}
+            </Button>
+          </Card>
+
+          {/* Wachtwoord wijzigen */}
+          <Card className="p-4 sm:p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <Lock className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold">Wachtwoord wijzigen</h3>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-password">Nieuw wachtwoord</Label>
+              <Input
+                id="new-password"
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Minimaal 6 tekens"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password">Bevestig wachtwoord</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Herhaal wachtwoord"
+              />
+            </div>
+            <Button 
+              onClick={updatePassword} 
+              disabled={updatingAuth || !currentPassword || !confirmPassword}
+              className="w-full"
+            >
+              <Lock className="mr-2 h-4 w-4" />
+              {updatingAuth ? "Bezig..." : "Wachtwoord wijzigen"}
+            </Button>
+          </Card>
+        </div>
+      </div>
+
+      {/* Admin Beheer */}
+      <div>
+        <div className="mb-6">
+          <h2 className="text-2xl sm:text-3xl font-bold">Admin Gebruikers</h2>
+          <p className="text-sm sm:text-base text-muted-foreground mt-2">
+            Beheer wie toegang heeft tot het admin panel
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          {/* Huidige admins */}
+          <Card className="p-4 sm:p-6">
+            <h3 className="font-semibold mb-4">Huidige Admins ({admins.length})</h3>
+            <div className="space-y-2">
+              {admins.map((admin) => (
+                <div key={admin.user_id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <span className="text-sm font-mono">{admin.user_id}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setAdminToDelete(admin.user_id)}
+                    disabled={admins.length === 1}
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+              ))}
+              {admins.length === 0 && (
+                <p className="text-sm text-muted-foreground">Geen admins gevonden</p>
+              )}
+            </div>
+          </Card>
+
+          {/* Nieuwe admin toevoegen */}
+          <Card className="p-4 sm:p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <UserPlus className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold">Admin Toevoegen</h3>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Voer de User ID in van een bestaand Supabase account om admin rechten toe te kennen.
+              Je kunt de User ID vinden in Supabase Dashboard → Authentication → Users.
+            </p>
+            <div className="flex gap-2">
+              <Input
+                type="text"
+                placeholder="User ID (UUID)"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    addAdminRole(newPassword);
+                    setNewPassword("");
+                  }
+                }}
+              />
+              <Button 
+                onClick={() => {
+                  addAdminRole(newPassword);
+                  setNewPassword("");
+                }}
+                disabled={!newPassword}
+              >
+                <UserPlus className="h-4 w-4" />
+              </Button>
+            </div>
+          </Card>
+        </div>
+      </div>
+
       {/* Bedrijfsinformatie */}
       <div>
         <div className="mb-6">
@@ -271,6 +596,28 @@ export default function AdminSettings() {
           {saving ? "Opslaan..." : "Alle Instellingen Opslaan"}
         </Button>
       </div>
+
+      {/* Delete Admin Confirmation Dialog */}
+      <AlertDialog open={!!adminToDelete} onOpenChange={() => setAdminToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Admin rechten verwijderen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Weet je zeker dat je de admin rechten wilt verwijderen van deze gebruiker?
+              Dit kan niet ongedaan worden gemaakt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuleren</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => adminToDelete && removeAdminRole(adminToDelete)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Verwijderen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
