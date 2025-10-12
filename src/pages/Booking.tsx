@@ -630,7 +630,10 @@ const Booking = () => {
                       </div>
                       
                       <div>
-                        <Label className="text-lg mb-4 block">Beschikbare tijden</Label>
+                        <Label className="text-lg mb-2 block">Beschikbare tijden</Label>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          {format(selectedDate, "EEEE d MMMM yyyy", { locale: nl })}
+                        </p>
                         {timeslotsLoading ? (
                           <div className="text-center py-8">
                             <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
