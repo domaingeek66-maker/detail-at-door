@@ -10,11 +10,12 @@ import { Label } from "@/components/ui/label";
 interface Customer {
   id: string;
   name: string;
-  phone: string;
+  email: string;
 }
 
 export default function AdminBroadcast() {
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -28,7 +29,7 @@ export default function AdminBroadcast() {
     try {
       const { data, error } = await supabase
         .from("customers")
-        .select("id, name, phone")
+        .select("id, name, email")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -46,6 +47,15 @@ export default function AdminBroadcast() {
   };
 
   const handleSendBroadcast = async () => {
+    if (!subject.trim()) {
+      toast({
+        title: "Fout",
+        description: "Voer een onderwerp in",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!message.trim()) {
       toast({
         title: "Fout",
@@ -67,12 +77,13 @@ export default function AdminBroadcast() {
     setIsSending(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke("send-whatsapp-broadcast", {
+      const { data, error } = await supabase.functions.invoke("send-email-broadcast", {
         body: {
+          subject: subject.trim(),
           message: message.trim(),
           customers: customers.map(c => ({
             name: c.name,
-            phone: c.phone,
+            email: c.email,
           })),
         },
       });
@@ -81,15 +92,16 @@ export default function AdminBroadcast() {
 
       toast({
         title: "Succesvol verzonden",
-        description: `Bericht verzonden naar ${customers.length} klanten`,
+        description: `E-mails verzonden naar ${customers.length} klanten`,
       });
 
+      setSubject("");
       setMessage("");
     } catch (error: any) {
       console.error("Error sending broadcast:", error);
       toast({
         title: "Fout bij verzenden",
-        description: error.message || "Kon berichten niet verzenden. Controleer of de Twilio instellingen correct zijn.",
+        description: error.message || "Kon e-mails niet verzonden. Controleer of de Gmail instellingen correct zijn.",
         variant: "destructive",
       });
     } finally {
@@ -100,15 +112,18 @@ export default function AdminBroadcast() {
   const messageTemplates = [
     {
       title: "Nieuwjaarswens",
-      content: "Beste klant, wij wensen u een gelukkig en voorspoedig nieuwjaar! Bedankt voor uw vertrouwen in ons. 🎉",
+      subject: "Gelukkig Nieuwjaar! 🎉",
+      content: "Wij wensen u een gelukkig en voorspoedig nieuwjaar! Bedankt voor uw vertrouwen in ons.",
     },
     {
       title: "Feestdagen",
-      content: "Fijne feestdagen gewenst! Wij zijn er ook dit jaar weer voor al uw detailing behoeften. 🎄",
+      subject: "Fijne Feestdagen 🎄",
+      content: "Fijne feestdagen gewenst! Wij zijn er ook dit jaar weer voor al uw detailing behoeften.",
     },
     {
       title: "Speciale aanbieding",
-      content: "Speciale actie deze maand! Boek nu en ontvang 10% korting op onze diensten. Geldig t/m einde maand. 🚗✨",
+      subject: "Speciale Actie - 10% Korting! 🚗",
+      content: "Speciale actie deze maand! Boek nu en ontvang 10% korting op onze diensten. Geldig t/m einde maand.",
     },
   ];
 
@@ -123,9 +138,9 @@ export default function AdminBroadcast() {
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">WhatsApp Broadcast</h1>
+        <h1 className="text-3xl font-bold mb-2">E-mail Broadcast</h1>
         <p className="text-muted-foreground">
-          Verstuur berichten naar alle klanten via WhatsApp
+          Verstuur e-mails naar alle klanten via Gmail
         </p>
       </div>
 
@@ -137,7 +152,7 @@ export default function AdminBroadcast() {
               Ontvangers
             </CardTitle>
             <CardDescription>
-              {customers.length} klanten zullen dit bericht ontvangen
+              {customers.length} klanten zullen deze e-mail ontvangen
             </CardDescription>
           </CardHeader>
         </Card>
@@ -153,11 +168,17 @@ export default function AdminBroadcast() {
                 key={index}
                 variant="outline"
                 className="justify-start h-auto py-3 px-4 text-left"
-                onClick={() => setMessage(template.content)}
+                onClick={() => {
+                  setSubject(template.subject);
+                  setMessage(template.content);
+                }}
               >
                 <div>
                   <div className="font-semibold">{template.title}</div>
                   <div className="text-sm text-muted-foreground mt-1">
+                    <strong>Onderwerp:</strong> {template.subject}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
                     {template.content}
                   </div>
                 </div>
@@ -168,12 +189,24 @@ export default function AdminBroadcast() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Bericht</CardTitle>
+            <CardTitle>E-mail Bericht</CardTitle>
             <CardDescription>
-              Schrijf uw bericht voor alle klanten
+              Schrijf uw e-mail voor alle klanten
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="subject">Onderwerp</Label>
+              <input
+                id="subject"
+                type="text"
+                placeholder="Voer onderwerp in..."
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="message">Bericht tekst</Label>
               <Textarea
@@ -191,7 +224,7 @@ export default function AdminBroadcast() {
 
             <Button
               onClick={handleSendBroadcast}
-              disabled={isSending || !message.trim()}
+              disabled={isSending || !subject.trim() || !message.trim()}
               className="w-full"
               size="lg"
             >
