@@ -716,7 +716,7 @@ const Booking = () => {
                   
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="phone">WhatsApp Nummer *</Label>
+                      <Label htmlFor="phone">Telefoonnummer *</Label>
                       <Input 
                         id="phone"
                         value={formData.phone || ''}
