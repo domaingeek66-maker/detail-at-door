@@ -36,6 +36,7 @@ type BookingForm = z.infer<typeof bookingSchema>;
 const Booking = () => {
   const [step, setStep] = useState(1);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [serviceQuantities, setServiceQuantities] = useState<Record<string, number>>({});
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [formData, setFormData] = useState<Partial<BookingForm>>({});
@@ -62,10 +63,20 @@ const Booking = () => {
   const handleServiceToggle = (serviceId: string) => {
     if (selectedServices.includes(serviceId)) {
       setSelectedServices(selectedServices.filter(id => id !== serviceId));
+      const newQuantities = { ...serviceQuantities };
+      delete newQuantities[serviceId];
+      setServiceQuantities(newQuantities);
     } else {
       setSelectedServices([...selectedServices, serviceId]);
+      setServiceQuantities({ ...serviceQuantities, [serviceId]: 1 });
     }
     setSelectedTime(""); // Reset time when services change
+  };
+
+  const handleQuantityChange = (serviceId: string, quantity: number) => {
+    if (quantity > 0 && quantity <= 10) {
+      setServiceQuantities({ ...serviceQuantities, [serviceId]: quantity });
+    }
   };
 
   const handleDateSelect = (date: Date | undefined) => {
@@ -139,7 +150,10 @@ const Booking = () => {
 
       // Calculate prices
       const originalPrice = (services?.filter(s => selectedServices.includes(s.id))
-        .reduce((sum, s) => sum + Number(s.price), 0) || 0) + (travelInfo?.travel_cost || 0);
+        .reduce((sum, s) => {
+          const quantity = serviceQuantities[s.id] || 1;
+          return sum + (Number(s.price) * quantity);
+        }, 0) || 0) + (travelInfo?.travel_cost || 0);
       
       const discountAmount = appliedDiscount?.amount || 0;
       const finalPrice = originalPrice - discountAmount;
@@ -257,7 +271,10 @@ const Booking = () => {
 
   const calculateTotalPrice = () => {
     const serviceTotal = services?.filter(s => selectedServices.includes(s.id))
-      .reduce((sum, s) => sum + Number(s.price), 0) || 0;
+      .reduce((sum, s) => {
+        const quantity = serviceQuantities[s.id] || 1;
+        return sum + (Number(s.price) * quantity);
+      }, 0) || 0;
     const travelCost = travelInfo?.travel_cost || 0;
     return serviceTotal + travelCost;
   };
@@ -487,26 +504,84 @@ const Booking = () => {
                   <CardDescription className="text-sm sm:text-base">Selecteer één of meerdere diensten</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {services?.map((service) => (
-                    <div 
-                      key={service.id}
-                      className="flex items-start gap-4 p-4 rounded-lg border border-border hover:border-primary transition-smooth cursor-pointer"
-                      onClick={() => handleServiceToggle(service.id)}
-                    >
-                      <Checkbox 
-                        checked={selectedServices.includes(service.id)}
-                        className="mt-1"
-                      />
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-base sm:text-lg">{service.name}</h3>
-                        <p className="text-muted-foreground text-xs sm:text-sm">{service.description}</p>
-                        <div className="flex items-center gap-4 mt-2">
-                          <span className="text-primary font-bold text-sm sm:text-base">€{service.price},-</span>
-                          <span className="text-xs sm:text-sm text-muted-foreground">{service.duration_min} min</span>
+                  {services?.map((service) => {
+                    const isSeatCleaning = service.name === "Stoelreiniging";
+                    const isSelected = selectedServices.includes(service.id);
+                    const quantity = serviceQuantities[service.id] || 1;
+                    
+                    return (
+                      <div 
+                        key={service.id}
+                        className="p-4 rounded-lg border border-border hover:border-primary transition-smooth"
+                      >
+                        <div 
+                          className="flex items-start gap-4 cursor-pointer"
+                          onClick={() => handleServiceToggle(service.id)}
+                        >
+                          <Checkbox 
+                            checked={isSelected}
+                            className="mt-1"
+                          />
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-base sm:text-lg">{service.name}</h3>
+                            <p className="text-muted-foreground text-xs sm:text-sm">{service.description}</p>
+                            <div className="flex items-center gap-4 mt-2">
+                              <span className="text-primary font-bold text-sm sm:text-base">
+                                €{service.price},-{isSeatCleaning && " per stoel"}
+                              </span>
+                              <span className="text-xs sm:text-sm text-muted-foreground">{service.duration_min} min</span>
+                            </div>
+                          </div>
                         </div>
+                        
+                        {isSeatCleaning && isSelected && (
+                          <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
+                            <Label className="text-sm font-medium">Aantal stoelen:</Label>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleQuantityChange(service.id, quantity - 1);
+                                }}
+                                disabled={quantity <= 1}
+                                className="h-8 w-8 p-0"
+                              >
+                                -
+                              </Button>
+                              <Input
+                                type="number"
+                                min="1"
+                                max="10"
+                                value={quantity}
+                                onChange={(e) => {
+                                  e.stopPropagation();
+                                  handleQuantityChange(service.id, parseInt(e.target.value) || 1);
+                                }}
+                                onClick={(e) => e.stopPropagation()}
+                                className="w-16 h-8 text-center"
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleQuantityChange(service.id, quantity + 1);
+                                }}
+                                disabled={quantity >= 10}
+                                className="h-8 w-8 p-0"
+                              >
+                                +
+                              </Button>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                   <Button onClick={handleNext} className="w-full gradient-primary shadow-glow" size="lg">
                     Volgende Stap
                   </Button>
@@ -757,12 +832,19 @@ const Booking = () => {
                   <div>
                     <h3 className="font-semibold mb-2">Gekozen Diensten</h3>
                     <ul className="space-y-1">
-                      {services?.filter(s => selectedServices.includes(s.id)).map(s => (
-                        <li key={s.id} className="text-muted-foreground flex justify-between">
-                          <span>• {s.name}</span>
-                          <span>€{s.price}</span>
-                        </li>
-                      ))}
+                      {services?.filter(s => selectedServices.includes(s.id)).map(s => {
+                        const quantity = serviceQuantities[s.id] || 1;
+                        const totalPrice = Number(s.price) * quantity;
+                        return (
+                          <li key={s.id} className="text-muted-foreground flex justify-between">
+                            <span>
+                              • {s.name}
+                              {quantity > 1 && <span className="text-xs ml-1">({quantity}x)</span>}
+                            </span>
+                            <span>€{totalPrice.toFixed(2)}</span>
+                          </li>
+                        );
+                      })}
                       {travelInfo && travelInfo.travel_cost > 0 && (
                         <li className="text-amber-600 flex justify-between border-t border-border pt-1 mt-1">
                           <span>• Reiskosten ({travelInfo.distance} km)</span>
