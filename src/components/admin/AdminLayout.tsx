@@ -166,7 +166,7 @@ export default function AdminLayout() {
                         className="w-full justify-start"
                       >
                         <Send className="mr-2 h-4 w-4" />
-                        WhatsApp Broadcast
+                        Email Broadcast
                       </Button>
                     </Link>
                     <Link to="/admin/discounts" onClick={() => setMobileMenuOpen(false)}>
@@ -295,7 +295,7 @@ export default function AdminLayout() {
                     className="w-full justify-start"
                   >
                     <Send className="mr-2 h-4 w-4" />
-                    WhatsApp Broadcast
+                    Email Broadcast
                   </Button>
                 </Link>
                 <Link to="/admin/discounts">
