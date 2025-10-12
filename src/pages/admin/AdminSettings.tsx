@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Save, UserPlus, Trash2, Mail, Lock } from "lucide-react";
+import { Save, UserPlus, Trash2, Lock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import {
   AlertDialog,
@@ -28,7 +28,6 @@ export default function AdminSettings() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [admins, setAdmins] = useState<any[]>([]);
-  const [newEmail, setNewEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -81,38 +80,6 @@ export default function AdminSettings() {
     setAdmins(data || []);
   };
 
-  const updateEmail = async () => {
-    if (!newEmail.trim()) {
-      toast({
-        variant: "destructive",
-        title: "Fout",
-        description: "Vul een geldig e-mailadres in",
-      });
-      return;
-    }
-
-    setUpdatingAuth(true);
-    const { error } = await supabase.auth.updateUser({
-      email: newEmail,
-    }, {
-      emailRedirectTo: undefined, // No email confirmation needed
-    });
-
-    if (error) {
-      toast({
-        variant: "destructive",
-        title: "Fout bij wijzigen email",
-        description: error.message,
-      });
-    } else {
-      toast({
-        title: "Email gewijzigd",
-        description: "Je email is direct gewijzigd zonder bevestiging",
-      });
-      setNewEmail("");
-    }
-    setUpdatingAuth(false);
-  };
 
   const updatePassword = async () => {
     if (!currentPassword || !confirmPassword) {
@@ -334,33 +301,7 @@ export default function AdminSettings() {
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Email wijzigen */}
-          <Card className="p-4 sm:p-6 space-y-4">
-            <div className="flex items-center gap-2">
-              <Mail className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold">E-mailadres wijzigen</h3>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="new-email">Nieuw e-mailadres</Label>
-              <Input
-                id="new-email"
-                type="email"
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-                placeholder="nieuw@email.com"
-              />
-            </div>
-            <Button 
-              onClick={updateEmail} 
-              disabled={updatingAuth || !newEmail}
-              className="w-full"
-            >
-              <Mail className="mr-2 h-4 w-4" />
-              {updatingAuth ? "Bezig..." : "Email wijzigen"}
-            </Button>
-          </Card>
-
+        <div className="max-w-md">
           {/* Wachtwoord wijzigen */}
           <Card className="p-4 sm:p-6 space-y-4">
             <div className="flex items-center gap-2">
