@@ -567,53 +567,71 @@ export default function AdminDashboard() {
             {upcomingAppointments.map((appointment) => (
               <Card key={appointment.id} className="bg-card">
                 <CardContent className="p-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 flex-1">
-                      <div className="flex items-center gap-2">
-                        <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">
-                          {format(new Date(appointment.appointment_date), "EEE dd MMM", { locale: nl })}
-                        </span>
+                  <div className="flex flex-col gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 flex-1">
+                        <div className="flex items-center gap-2">
+                          <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">
+                            {format(new Date(appointment.appointment_date), "EEE dd MMM", { locale: nl })}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm">{appointment.appointment_time.substring(0, 5)}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">{appointment.customers.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Car className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">
+                            {appointment.vehicle_make} {appointment.vehicle_model}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{appointment.appointment_time.substring(0, 5)}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">{appointment.customers.name}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Car className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">
-                          {appointment.vehicle_make} {appointment.vehicle_model}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <MapPin className="h-4 w-4" />
-                        <span>{appointment.city}</span>
+                      <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                        {getStatusBadge(appointment.status)}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openWhatsApp(appointment.customers.phone)}
+                          className="whitespace-nowrap"
+                        >
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                          WhatsApp
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openInMaps(appointment)}
+                          className="whitespace-nowrap"
+                        >
+                          <MapPin className="h-4 w-4 mr-2" />
+                          Open Maps
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                      {getStatusBadge(appointment.status)}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openWhatsApp(appointment.customers.phone)}
-                        className="whitespace-nowrap"
-                      >
-                        <MessageCircle className="h-4 w-4 mr-2" />
-                        WhatsApp
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openInMaps(appointment)}
-                        className="whitespace-nowrap"
-                      >
-                        <MapPin className="h-4 w-4 mr-2" />
-                        Open Maps
-                      </Button>
+                    
+                    <div className="flex flex-col sm:flex-row gap-3 pt-3 border-t border-border">
+                      <div className="flex items-start gap-2 flex-1">
+                        <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
+                        <span className="text-sm text-muted-foreground">
+                          {appointment.street_address}, {appointment.postal_code} {appointment.city}
+                        </span>
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-1">
+                        {appointment.service_ids.map((serviceId) => {
+                          const service = services.find(s => s.id === serviceId);
+                          return service ? (
+                            <Badge key={serviceId} variant="secondary" className="text-xs">
+                              {service.name}
+                            </Badge>
+                          ) : null;
+                        })}
+                      </div>
                     </div>
                   </div>
                 </CardContent>
