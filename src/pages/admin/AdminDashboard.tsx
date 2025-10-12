@@ -33,7 +33,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { format, startOfWeek, startOfMonth, startOfYear, isAfter } from "date-fns";
 import { nl } from "date-fns/locale";
-import { Trash2, FileText, Calendar as CalendarIcon, Clock, User, Car, Search, Euro, Users, CheckCircle2, AlertTriangle, Download, MapPin, MessageCircle } from "lucide-react";
+import { Trash2, FileText, Calendar as CalendarIcon, Clock, User, Car, Search, Euro, Users, CheckCircle2, AlertTriangle, Download, MapPin, MessageCircle, Mail } from "lucide-react";
 import { InvoiceDialog } from "@/components/admin/InvoiceDialog";
 import { Input } from "@/components/ui/input";
 
@@ -267,6 +267,10 @@ export default function AdminDashboard() {
     }
     
     window.location.href = `https://wa.me/${cleanPhone}`;
+  };
+
+  const openEmail = (email: string) => {
+    window.location.href = `mailto:${email}`;
   };
 
   const calculateRevenue = () => {
@@ -596,11 +600,11 @@ export default function AdminDashboard() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => openWhatsApp(appointment.customers.phone)}
+                          onClick={() => openEmail(appointment.customers.email)}
                           className="whitespace-nowrap"
                         >
-                          <MessageCircle className="h-4 w-4 mr-2" />
-                          WhatsApp
+                          <Mail className="h-4 w-4 mr-2" />
+                          E-mail
                         </Button>
                         <Button
                           variant="outline"
