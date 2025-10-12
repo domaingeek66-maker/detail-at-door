@@ -903,23 +903,41 @@ const Booking = () => {
                       </div>
                     )}
 
-                    {appliedDiscount && (
-                      <div className="mt-3 pt-3 border-t border-border space-y-1">
+                    <div className="mt-3 pt-3 border-t border-border space-y-1">
+                      {appliedDiscount && (
+                        <>
+                          <div className="flex justify-between text-muted-foreground">
+                            <span>Subtotaal:</span>
+                            <span>€{calculateTotalPrice().toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between text-green-600 font-semibold">
+                            <span>Korting:</span>
+                            <span>- €{appliedDiscount.amount.toFixed(2)}</span>
+                          </div>
+                        </>
+                      )}
+                      {!appliedDiscount && (
                         <div className="flex justify-between text-muted-foreground">
-                          <span>Subtotaal:</span>
+                          <span>Subtotaal (excl. BTW):</span>
                           <span>€{calculateTotalPrice().toFixed(2)}</span>
                         </div>
-                        <div className="flex justify-between text-green-600 font-semibold">
-                          <span>Korting:</span>
-                          <span>- €{appliedDiscount.amount.toFixed(2)}</span>
+                      )}
+                      {appliedDiscount && (
+                        <div className="flex justify-between text-muted-foreground">
+                          <span>Subtotaal na korting (excl. BTW):</span>
+                          <span>€{(calculateTotalPrice() - appliedDiscount.amount).toFixed(2)}</span>
                         </div>
+                      )}
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>BTW (21%):</span>
+                        <span>€{((calculateTotalPrice() - (appliedDiscount?.amount || 0)) * 0.21).toFixed(2)}</span>
                       </div>
-                    )}
+                    </div>
 
                     <div className="mt-3 pt-3 border-t border-border flex justify-between font-bold text-lg">
-                      <span>Totaal:</span>
+                      <span>Totaal (incl. BTW):</span>
                       <span>
-                        €{(calculateTotalPrice() - (appliedDiscount?.amount || 0)).toFixed(2)}
+                        €{((calculateTotalPrice() - (appliedDiscount?.amount || 0)) * 1.21).toFixed(2)}
                       </span>
                     </div>
                   </div>
