@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { Car, Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin } from "lucide-react";
+import logoIcon from "@/assets/logo-icon.png";
 
 export const Footer = () => {
   return (
@@ -8,11 +9,11 @@ export const Footer = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <Car className="w-6 h-6 text-primary" />
+              <img src={logoIcon} alt="Cardetail Exclusief logo" className="w-6 h-6" />
               <span className="font-bold text-lg">Cardetail Exclusief</span>
             </div>
             <p className="text-sm text-muted-foreground">
-              Premium car detailing service aan huis voor de meest veeleisende klanten.
+              Premium car detailing service aan huis
             </p>
           </div>
           
@@ -29,10 +30,10 @@ export const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">Diensten</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>Exterior & Velgen</li>
-              <li>Interieur + Exterieur</li>
-              <li>Ceramic Coating</li>
-              <li>Wax Behandeling</li>
+              <li><Link to="/boeking" className="hover:text-primary transition-smooth">Exterior & Velgen</Link></li>
+              <li><Link to="/boeking" className="hover:text-primary transition-smooth">Interieur + Exterieur</Link></li>
+              <li><Link to="/boeking" className="hover:text-primary transition-smooth">Ceramic Coating</Link></li>
+              <li><Link to="/boeking" className="hover:text-primary transition-smooth">Wax Behandeling</Link></li>
             </ul>
           </div>
           
@@ -41,7 +42,7 @@ export const Footer = () => {
             <ul className="space-y-3 text-sm text-muted-foreground">
               <li className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-primary" />
-                <span>+31 6 12345678</span>
+                <span>+31612345678</span>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-primary" />
