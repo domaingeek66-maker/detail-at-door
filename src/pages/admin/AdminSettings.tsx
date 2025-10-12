@@ -34,6 +34,9 @@ export default function AdminSettings() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [adminToDelete, setAdminToDelete] = useState<string | null>(null);
   const [updatingAuth, setUpdatingAuth] = useState(false);
+  const [newAdminEmail, setNewAdminEmail] = useState("");
+  const [newAdminPassword, setNewAdminPassword] = useState("");
+  const [creatingAdmin, setCreatingAdmin] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -91,6 +94,8 @@ export default function AdminSettings() {
     setUpdatingAuth(true);
     const { error } = await supabase.auth.updateUser({
       email: newEmail,
+    }, {
+      emailRedirectTo: undefined, // No email confirmation needed
     });
 
     if (error) {
@@ -102,7 +107,7 @@ export default function AdminSettings() {
     } else {
       toast({
         title: "Email gewijzigd",
-        description: "Controleer je nieuwe email voor bevestiging",
+        description: "Je email is direct gewijzigd zonder bevestiging",
       });
       setNewEmail("");
     }
@@ -159,43 +164,60 @@ export default function AdminSettings() {
     setUpdatingAuth(false);
   };
 
-  const addAdminRole = async (userId: string) => {
-    if (!userId.trim()) {
+  const createAdminUser = async () => {
+    if (!newAdminEmail.trim() || !newAdminPassword.trim()) {
       toast({
         variant: "destructive",
         title: "Fout",
-        description: "Voer een geldig user ID in",
+        description: "Vul email en wachtwoord in",
       });
       return;
     }
 
-    // Add admin role
-    const { error } = await supabase
-      .from("user_roles")
-      .insert({ user_id: userId, role: "admin" });
-
-    if (error) {
-      if (error.code === "23505") {
-        toast({
-          variant: "destructive",
-          title: "Al admin",
-          description: "Deze gebruiker heeft al admin rechten",
-        });
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Fout bij toevoegen admin",
-          description: error.message,
-        });
-      }
+    if (newAdminPassword.length < 6) {
+      toast({
+        variant: "destructive",
+        title: "Fout",
+        description: "Wachtwoord moet minimaal 6 tekens lang zijn",
+      });
       return;
     }
 
-    toast({
-      title: "Admin toegevoegd",
-      description: "Admin rechten zijn toegekend",
-    });
-    fetchAdmins();
+    setCreatingAdmin(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('create-admin-user', {
+        body: {
+          email: newAdminEmail,
+          password: newAdminPassword,
+        },
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (!data.success) {
+        throw new Error(data.error || 'Fout bij aanmaken admin');
+      }
+
+      toast({
+        title: "Admin aangemaakt",
+        description: `Admin account voor ${newAdminEmail} is succesvol aangemaakt`,
+      });
+
+      setNewAdminEmail("");
+      setNewAdminPassword("");
+      fetchAdmins();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Fout bij aanmaken admin",
+        description: error.message || "Er ging iets mis",
+      });
+    } finally {
+      setCreatingAdmin(false);
+    }
   };
 
   const removeAdminRole = async (userId: string) => {
@@ -414,33 +436,45 @@ export default function AdminSettings() {
           <Card className="p-4 sm:p-6 space-y-4">
             <div className="flex items-center gap-2">
               <UserPlus className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold">Admin Toevoegen</h3>
+              <h3 className="font-semibold">Nieuwe Admin Aanmaken</h3>
             </div>
             <p className="text-sm text-muted-foreground">
-              Voer de User ID in van een bestaand Supabase account om admin rechten toe te kennen.
-              Je kunt de User ID vinden in Supabase Dashboard → Authentication → Users.
+              Maak een nieuwe admin gebruiker aan met e-mail en wachtwoord. 
+              De gebruiker kan direct inloggen zonder e-mailbevestiging.
             </p>
-            <div className="flex gap-2">
-              <Input
-                type="text"
-                placeholder="User ID (UUID)"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    addAdminRole(newPassword);
-                    setNewPassword("");
-                  }
-                }}
-              />
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label htmlFor="new-admin-email">E-mailadres</Label>
+                <Input
+                  id="new-admin-email"
+                  type="email"
+                  placeholder="admin@voorbeeld.nl"
+                  value={newAdminEmail}
+                  onChange={(e) => setNewAdminEmail(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-admin-password">Wachtwoord</Label>
+                <Input
+                  id="new-admin-password"
+                  type="password"
+                  placeholder="Minimaal 6 tekens"
+                  value={newAdminPassword}
+                  onChange={(e) => setNewAdminPassword(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      createAdminUser();
+                    }
+                  }}
+                />
+              </div>
               <Button 
-                onClick={() => {
-                  addAdminRole(newPassword);
-                  setNewPassword("");
-                }}
-                disabled={!newPassword}
+                onClick={createAdminUser}
+                disabled={creatingAdmin || !newAdminEmail || !newAdminPassword}
+                className="w-full"
               >
-                <UserPlus className="h-4 w-4" />
+                <UserPlus className="mr-2 h-4 w-4" />
+                {creatingAdmin ? "Aanmaken..." : "Admin Aanmaken"}
               </Button>
             </div>
           </Card>
