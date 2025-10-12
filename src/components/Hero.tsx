@@ -32,7 +32,7 @@ export const Hero = () => {
             {[
               "Wij komen bij u aan huis",
               "Transparante prijzen",
-              "Betaling op locatie",
+              "Betaling op locatie of factuur",
               "WhatsApp bevestiging"
             ].map((benefit, index) => (
               <div 
