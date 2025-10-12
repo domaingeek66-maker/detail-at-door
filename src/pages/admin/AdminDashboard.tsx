@@ -595,26 +595,28 @@ export default function AdminDashboard() {
                           </span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                      <div className="flex items-center gap-2 flex-wrap">
                         {getStatusBadge(appointment.status)}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openEmail(appointment.customers.email)}
-                          className="whitespace-nowrap"
-                        >
-                          <Mail className="h-4 w-4 mr-2" />
-                          E-mail
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => openInMaps(appointment)}
-                          className="whitespace-nowrap"
-                        >
-                          <MapPin className="h-4 w-4 mr-2" />
-                          Open Maps
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openEmail(appointment.customers.email)}
+                            className="whitespace-nowrap"
+                          >
+                            <Mail className="h-4 w-4 mr-2" />
+                            E-mail
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openInMaps(appointment)}
+                            className="whitespace-nowrap"
+                          >
+                            <MapPin className="h-4 w-4 mr-2" />
+                            Open Maps
+                          </Button>
+                        </div>
                       </div>
                     </div>
                     
