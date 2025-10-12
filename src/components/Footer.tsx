@@ -42,11 +42,11 @@ export const Footer = () => {
             <ul className="space-y-3 text-sm text-muted-foreground">
               <li className="flex items-center gap-2 leading-none">
                 <Phone className="w-4 h-4 text-primary shrink-0" />
-                <a href="tel:+31621116963" className="hover:text-primary transition-smooth whitespace-nowrap leading-none">+31621116963</a>
+                <a href="tel:+31621116963" className="hover:text-primary transition-smooth whitespace-nowrap leading-none block">+31621116963</a>
               </li>
-              <li className="flex items-center gap-2">
+              <li className="flex items-center gap-2 leading-none">
                 <Mail className="w-4 h-4 text-primary shrink-0" />
-                <a href="mailto:cardetail.exclusief@gmail.com" className="hover:text-primary transition-smooth whitespace-nowrap leading-none">cardetail.exclusief@gmail.com</a>
+                <a href="mailto:cardetail.exclusief@gmail.com" className="hover:text-primary transition-smooth whitespace-nowrap leading-none block">cardetail.exclusief@gmail.com</a>
               </li>
               <li className="flex items-center gap-2">
                 <MapPin className="w-4 h-4 text-primary shrink-0" />
