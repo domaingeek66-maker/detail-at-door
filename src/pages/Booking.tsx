@@ -118,6 +118,7 @@ const Booking = () => {
         body: {
           date: format(selectedDate, 'yyyy-MM-dd'),
           serviceIds: selectedServices,
+          serviceQuantities: serviceQuantities,
         },
       });
 
@@ -266,7 +267,10 @@ const Booking = () => {
     if (!services || selectedServices.length === 0) return 0;
     return services
       .filter(s => selectedServices.includes(s.id))
-      .reduce((sum, s) => sum + s.duration_min, 0);
+      .reduce((sum, s) => {
+        const quantity = serviceQuantities[s.id] || 1;
+        return sum + (s.duration_min * quantity);
+      }, 0);
   };
 
   const calculateTotalPrice = () => {

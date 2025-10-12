@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     );
 
-    const { date, serviceIds } = await req.json();
+    const { date, serviceIds, serviceQuantities } = await req.json();
 
     if (!date || !serviceIds || serviceIds.length === 0) {
       return new Response(
@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log('Calculating timeslots for:', { date, serviceIds });
+    console.log('Calculating timeslots for:', { date, serviceIds, serviceQuantities });
 
     // Get day of week for the date
     // Parse date as local date by adding time component to avoid timezone shifts
@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
     // Get services to calculate total duration
     const { data: services, error: servicesError } = await supabaseClient
       .from('services')
-      .select('duration_min')
+      .select('id, duration_min')
       .in('id', serviceIds);
 
     if (servicesError) {
@@ -74,7 +74,10 @@ Deno.serve(async (req) => {
       throw servicesError;
     }
 
-    const totalDurationMin = services.reduce((sum, s) => sum + s.duration_min, 0);
+    const totalDurationMin = services.reduce((sum, s) => {
+      const quantity = serviceQuantities?.[s.id] || 1;
+      return sum + (s.duration_min * quantity);
+    }, 0);
     console.log('Total duration needed:', totalDurationMin, 'minutes');
 
     // Get existing appointments for this date
