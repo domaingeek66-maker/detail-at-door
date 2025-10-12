@@ -11,6 +11,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function AdminLayout() {
   const [loading, setLoading] = useState(true);
@@ -85,116 +86,118 @@ export default function AdminLayout() {
                 <SheetHeader>
                   <SheetTitle>Navigatie</SheetTitle>
                 </SheetHeader>
-                <nav className="flex flex-col gap-2 mt-6">
-                  <Link to="/admin/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                    <Button
-                      variant={isActive("/admin/dashboard") ? "default" : "ghost"}
-                      className="w-full justify-start"
-                    >
-                      <Calendar className="mr-2 h-4 w-4" />
-                      Afspraken
-                    </Button>
-                  </Link>
-                  <Link to="/admin/customers" onClick={() => setMobileMenuOpen(false)}>
-                    <Button
-                      variant={isActive("/admin/customers") ? "default" : "ghost"}
-                      className="w-full justify-start"
-                    >
-                      <Users className="mr-2 h-4 w-4" />
-                      Klanten
-                    </Button>
-                  </Link>
-                  <Link to="/admin/services" onClick={() => setMobileMenuOpen(false)}>
-                    <Button
-                      variant={isActive("/admin/services") ? "default" : "ghost"}
-                      className="w-full justify-start"
-                    >
-                      <Briefcase className="mr-2 h-4 w-4" />
-                      Diensten
-                    </Button>
-                  </Link>
-                  <Link to="/admin/availability" onClick={() => setMobileMenuOpen(false)}>
-                    <Button
-                      variant={isActive("/admin/availability") ? "default" : "ghost"}
-                      className="w-full justify-start"
-                    >
-                      <Clock className="mr-2 h-4 w-4" />
-                      Beschikbaarheid
-                    </Button>
-                  </Link>
-                  <Link to="/admin/blog-posts" onClick={() => setMobileMenuOpen(false)}>
-                    <Button
-                      variant={isActive("/admin/blog-posts") ? "default" : "ghost"}
-                      className="w-full justify-start"
-                    >
-                      <BookOpen className="mr-2 h-4 w-4" />
-                      Blog Posts
-                    </Button>
-                  </Link>
-                  <Link to="/admin/portfolio" onClick={() => setMobileMenuOpen(false)}>
-                    <Button
-                      variant={isActive("/admin/portfolio") ? "default" : "ghost"}
-                      className="w-full justify-start"
-                    >
-                      <Image className="mr-2 h-4 w-4" />
-                      Portfolio
-                    </Button>
-                  </Link>
-                  <Link to="/admin/about" onClick={() => setMobileMenuOpen(false)}>
-                    <Button
-                      variant={isActive("/admin/about") ? "default" : "ghost"}
-                      className="w-full justify-start"
-                    >
-                      <FileText className="mr-2 h-4 w-4" />
-                      Over Ons
-                    </Button>
-                  </Link>
-                  <Link to="/admin/contact" onClick={() => setMobileMenuOpen(false)}>
-                    <Button
-                      variant={isActive("/admin/contact") ? "default" : "ghost"}
-                      className="w-full justify-start"
-                    >
-                      <Phone className="mr-2 h-4 w-4" />
-                      Contact
-                    </Button>
-                  </Link>
-                  <Link to="/admin/broadcast" onClick={() => setMobileMenuOpen(false)}>
-                    <Button
-                      variant={isActive("/admin/broadcast") ? "default" : "ghost"}
-                      className="w-full justify-start"
-                    >
-                      <Send className="mr-2 h-4 w-4" />
-                      WhatsApp Broadcast
-                    </Button>
-                  </Link>
-                  <Link to="/admin/discounts" onClick={() => setMobileMenuOpen(false)}>
-                    <Button
-                      variant={isActive("/admin/discounts") ? "default" : "ghost"}
-                      className="w-full justify-start"
-                    >
-                      <Tag className="mr-2 h-4 w-4" />
-                      Kortingscodes
-                    </Button>
-                  </Link>
-                  <Link to="/admin/before-after" onClick={() => setMobileMenuOpen(false)}>
-                    <Button
-                      variant={isActive("/admin/before-after") ? "default" : "ghost"}
-                      className="w-full justify-start"
-                    >
-                      <ImagePlus className="mr-2 h-4 w-4" />
-                      Voor & Na
-                    </Button>
-                  </Link>
-                  <Link to="/admin/settings" onClick={() => setMobileMenuOpen(false)}>
-                    <Button
-                      variant={isActive("/admin/settings") ? "default" : "ghost"}
-                      className="w-full justify-start"
-                    >
-                      <Settings className="mr-2 h-4 w-4" />
-                      Instellingen
-                    </Button>
-                  </Link>
-                </nav>
+                <ScrollArea className="h-[calc(100vh-80px)] mt-6 pr-4">
+                  <nav className="flex flex-col gap-2">
+                    <Link to="/admin/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                      <Button
+                        variant={isActive("/admin/dashboard") ? "default" : "ghost"}
+                        className="w-full justify-start"
+                      >
+                        <Calendar className="mr-2 h-4 w-4" />
+                        Afspraken
+                      </Button>
+                    </Link>
+                    <Link to="/admin/customers" onClick={() => setMobileMenuOpen(false)}>
+                      <Button
+                        variant={isActive("/admin/customers") ? "default" : "ghost"}
+                        className="w-full justify-start"
+                      >
+                        <Users className="mr-2 h-4 w-4" />
+                        Klanten
+                      </Button>
+                    </Link>
+                    <Link to="/admin/services" onClick={() => setMobileMenuOpen(false)}>
+                      <Button
+                        variant={isActive("/admin/services") ? "default" : "ghost"}
+                        className="w-full justify-start"
+                      >
+                        <Briefcase className="mr-2 h-4 w-4" />
+                        Diensten
+                      </Button>
+                    </Link>
+                    <Link to="/admin/availability" onClick={() => setMobileMenuOpen(false)}>
+                      <Button
+                        variant={isActive("/admin/availability") ? "default" : "ghost"}
+                        className="w-full justify-start"
+                      >
+                        <Clock className="mr-2 h-4 w-4" />
+                        Beschikbaarheid
+                      </Button>
+                    </Link>
+                    <Link to="/admin/blog-posts" onClick={() => setMobileMenuOpen(false)}>
+                      <Button
+                        variant={isActive("/admin/blog-posts") ? "default" : "ghost"}
+                        className="w-full justify-start"
+                      >
+                        <BookOpen className="mr-2 h-4 w-4" />
+                        Blog Posts
+                      </Button>
+                    </Link>
+                    <Link to="/admin/portfolio" onClick={() => setMobileMenuOpen(false)}>
+                      <Button
+                        variant={isActive("/admin/portfolio") ? "default" : "ghost"}
+                        className="w-full justify-start"
+                      >
+                        <Image className="mr-2 h-4 w-4" />
+                        Portfolio
+                      </Button>
+                    </Link>
+                    <Link to="/admin/about" onClick={() => setMobileMenuOpen(false)}>
+                      <Button
+                        variant={isActive("/admin/about") ? "default" : "ghost"}
+                        className="w-full justify-start"
+                      >
+                        <FileText className="mr-2 h-4 w-4" />
+                        Over Ons
+                      </Button>
+                    </Link>
+                    <Link to="/admin/contact" onClick={() => setMobileMenuOpen(false)}>
+                      <Button
+                        variant={isActive("/admin/contact") ? "default" : "ghost"}
+                        className="w-full justify-start"
+                      >
+                        <Phone className="mr-2 h-4 w-4" />
+                        Contact
+                      </Button>
+                    </Link>
+                    <Link to="/admin/broadcast" onClick={() => setMobileMenuOpen(false)}>
+                      <Button
+                        variant={isActive("/admin/broadcast") ? "default" : "ghost"}
+                        className="w-full justify-start"
+                      >
+                        <Send className="mr-2 h-4 w-4" />
+                        WhatsApp Broadcast
+                      </Button>
+                    </Link>
+                    <Link to="/admin/discounts" onClick={() => setMobileMenuOpen(false)}>
+                      <Button
+                        variant={isActive("/admin/discounts") ? "default" : "ghost"}
+                        className="w-full justify-start"
+                      >
+                        <Tag className="mr-2 h-4 w-4" />
+                        Kortingscodes
+                      </Button>
+                    </Link>
+                    <Link to="/admin/before-after" onClick={() => setMobileMenuOpen(false)}>
+                      <Button
+                        variant={isActive("/admin/before-after") ? "default" : "ghost"}
+                        className="w-full justify-start"
+                      >
+                        <ImagePlus className="mr-2 h-4 w-4" />
+                        Voor & Na
+                      </Button>
+                    </Link>
+                    <Link to="/admin/settings" onClick={() => setMobileMenuOpen(false)}>
+                      <Button
+                        variant={isActive("/admin/settings") ? "default" : "ghost"}
+                        className="w-full justify-start"
+                      >
+                        <Settings className="mr-2 h-4 w-4" />
+                        Instellingen
+                      </Button>
+                    </Link>
+                  </nav>
+                </ScrollArea>
               </SheetContent>
             </Sheet>
             <h1 className="text-xl sm:text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
