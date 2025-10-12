@@ -61,6 +61,7 @@ interface Appointment {
 
 interface Service {
   id: string;
+  name: string;
   price: number;
 }
 
@@ -108,7 +109,7 @@ export default function AdminDashboard() {
   const fetchServices = async () => {
     const { data, error } = await supabase
       .from("services")
-      .select("id, price");
+      .select("id, name, price");
 
     if (error) {
       console.error("Error fetching services:", error);
@@ -683,6 +684,20 @@ export default function AdminDashboard() {
                   <div className="flex items-center gap-2 text-sm pt-2 border-t border-border">
                     <Car className="h-4 w-4 text-muted-foreground" />
                     <span>{appointment.vehicle_make} {appointment.vehicle_model}</span>
+                  </div>
+
+                  <div className="pt-2 border-t border-border space-y-1">
+                    <div className="text-xs font-medium text-muted-foreground">Diensten:</div>
+                    <div className="flex flex-wrap gap-1">
+                      {appointment.service_ids.map((serviceId) => {
+                        const service = services.find(s => s.id === serviceId);
+                        return service ? (
+                          <Badge key={serviceId} variant="secondary" className="text-xs">
+                            {service.name}
+                          </Badge>
+                        ) : null;
+                      })}
+                    </div>
                   </div>
 
                   <div className="pt-3 space-y-2">
