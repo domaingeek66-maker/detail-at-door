@@ -48,6 +48,10 @@ serve(async (req) => {
       console.log(`Sending booking confirmation to ${customerEmail}`);
 
       const servicesList = services.map(s => `<li style="margin: 4px 0;">${s}</li>`).join('');
+      
+      // Calculate price breakdown (assuming totalPrice includes 21% BTW)
+      const subtotal = totalPrice / 1.21;
+      const btw = totalPrice - subtotal;
 
       const html = `
 <!DOCTYPE html>
@@ -79,7 +83,7 @@ serve(async (req) => {
       padding: 40px 20px 30px 20px;
     }
     .header img {
-      max-width: 280px;
+      max-width: 200px;
       height: auto;
       margin-bottom: 20px;
     }
@@ -216,10 +220,22 @@ serve(async (req) => {
         <ul class="service-list">
           ${servicesList}
         </ul>
-        <div class="info-row" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(0, 191, 255, 0.2);">
-          <span class="info-icon">💰</span>
-          <span class="info-label">Totaalprijs:</span>
-          <span class="info-value" style="font-size: 18px; font-weight: 700; color: #00bfff;">€${totalPrice.toFixed(2)}</span>
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(0, 191, 255, 0.2);">
+          <div class="info-row">
+            <span class="info-icon">💰</span>
+            <span class="info-label">Subtotaal (excl. BTW):</span>
+            <span class="info-value">€${subtotal.toFixed(2)}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-icon"></span>
+            <span class="info-label">BTW (21%):</span>
+            <span class="info-value">€${btw.toFixed(2)}</span>
+          </div>
+          <div class="info-row" style="margin-top: 8px; padding-top: 12px; border-top: 1px solid rgba(0, 191, 255, 0.15);">
+            <span class="info-icon"></span>
+            <span class="info-label">Totaal (incl. BTW):</span>
+            <span class="info-value" style="font-size: 18px; font-weight: 700; color: #00bfff;">€${totalPrice.toFixed(2)}</span>
+          </div>
         </div>
       </div>
 
@@ -228,7 +244,7 @@ serve(async (req) => {
       </p>
       
       <p>
-        <span class="highlight">Betaling:</span> na afloop van de behandeling via contant of betaalverzoek (Tikkie).
+        <span class="highlight">Betaling:</span> na afloop van de behandeling Contant/tikkie of op Factuur.
       </p>
       
       <p>
