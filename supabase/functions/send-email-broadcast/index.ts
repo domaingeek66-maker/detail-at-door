@@ -119,7 +119,7 @@ serve(async (req) => {
 <body>
   <div class="container">
     <div class="header">
-      <img src="https://cardetailexclusief.nl/logo-email.png" alt="Cardetail.Exclusief Logo">
+      <img src="https://i.postimg.cc/1zyMk2Gg/Cardetail.png" alt="Cardetail.Exclusief Logo">
     </div>
     <div class="content">
       <p>Beste <strong>${customer.name || "klant"}</strong>,</p>
