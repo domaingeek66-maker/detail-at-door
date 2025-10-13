@@ -58,6 +58,17 @@ export const Footer = () => {
         
         <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
           <p>© 2025 Cardetail Exclusief. Alle rechten voorbehouden.</p>
+          <p className="mt-2">
+            Built with ❤️ by{" "}
+            <a 
+              href="https://ontwikkelaars.dev" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:text-primary transition-smooth underline"
+            >
+              ontwikkelaars.dev
+            </a>
+          </p>
         </div>
       </div>
     </footer>
