@@ -60,9 +60,9 @@ serve(async (req) => {
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Helvetica Neue', Arial, sans-serif;
-      background-color: #0a0a0a;
-      color: #eaeaea;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      background-color: #000000;
+      color: #ffffff;
     }
     a {
       color: #00bfff;
@@ -71,61 +71,109 @@ serve(async (req) => {
     .container {
       max-width: 600px;
       margin: 0 auto;
-      background-color: #111111;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 0 20px rgba(0, 191, 255, 0.2);
+      background-color: #0a0a0a;
     }
     .header {
-      background-color: #000000;
+      background: linear-gradient(180deg, #000000 0%, #0a0a0a 100%);
       text-align: center;
-      padding: 30px 0 10px 0;
+      padding: 40px 20px 30px 20px;
     }
     .header img {
-      max-width: 180px;
+      max-width: 280px;
       height: auto;
+      margin-bottom: 20px;
+    }
+    .header h1 {
+      color: #00bfff;
+      font-size: 28px;
+      font-weight: 600;
+      margin: 0;
+      letter-spacing: 1px;
+      text-transform: uppercase;
     }
     .content {
-      padding: 30px;
-      line-height: 1.7;
+      padding: 30px 30px 40px 30px;
+      line-height: 1.8;
     }
-    .content h1 {
-      color: #00bfff;
-      font-size: 24px;
-      margin-top: 0;
-      text-align: center;
+    .content p {
+      color: #e0e0e0;
+      margin: 15px 0;
     }
     .info-box {
-      background-color: #1a1a1a;
-      border: 1px solid #00bfff33;
-      padding: 20px;
-      border-radius: 6px;
-      margin: 20px 0;
+      background-color: #111111;
+      border: 1px solid rgba(0, 191, 255, 0.3);
+      border-radius: 12px;
+      padding: 25px;
+      margin: 30px 0;
     }
-    .info-box p {
-      margin: 8px 0;
+    .info-row {
+      display: flex;
+      align-items: flex-start;
+      margin: 12px 0;
+      color: #ffffff;
+    }
+    .info-icon {
+      font-size: 20px;
+      margin-right: 12px;
+      min-width: 24px;
+    }
+    .info-label {
+      font-weight: 600;
+      color: #00bfff;
+      margin-right: 8px;
+    }
+    .info-value {
+      color: #ffffff;
+    }
+    .service-list {
+      margin: 8px 0 0 36px;
+      padding: 0;
+      list-style: none;
+    }
+    .service-list li {
+      color: #ffffff;
+      margin: 6px 0;
+      padding-left: 16px;
+      position: relative;
+    }
+    .service-list li:before {
+      content: "•";
+      color: #00bfff;
+      font-weight: bold;
+      position: absolute;
+      left: 0;
+    }
+    .highlight {
+      color: #00bfff;
+      font-weight: 600;
+    }
+    .btn-container {
+      text-align: center;
+      margin: 35px 0 25px 0;
     }
     .btn {
       display: inline-block;
       background-color: #00bfff;
-      color: #ffffff;
-      font-weight: bold;
+      color: #000000 !important;
+      font-weight: 700;
       text-align: center;
-      padding: 12px 25px;
-      border-radius: 4px;
-      margin: 25px 0 10px 0;
+      padding: 14px 32px;
+      border-radius: 6px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .btn:hover {
-      background-color: #0095cc;
+      letter-spacing: 1px;
+      font-size: 14px;
+      text-decoration: none;
     }
     .footer {
       background-color: #000000;
       text-align: center;
-      padding: 20px;
-      font-size: 12px;
-      color: #888;
+      padding: 25px 20px;
+      font-size: 13px;
+      color: #666666;
+      border-top: 1px solid #1a1a1a;
+    }
+    .footer p {
+      margin: 8px 0;
     }
     .footer a {
       color: #00bfff;
@@ -135,50 +183,70 @@ serve(async (req) => {
 <body>
   <div class="container">
     <div class="header">
-      <h2 style="color: #00bfff; margin: 20px 0;">Cardetail.Exclusief</h2>
+      <img src="https://cardetailexclusief.nl/logo-email.png" alt="Cardetail.Exclusief Logo">
+      <h1>Bevestiging van je boeking</h1>
     </div>
     <div class="content">
-      <h1>Bevestiging van je boeking</h1>
-
       <p>Beste <strong>${customerName}</strong>,</p>
 
       <p>
-        Bedankt voor je boeking bij <strong>Cardetail.Exclusief</strong>!  
-        Hierbij bevestigen we je afspraak voor onze car detailing aan huis service.
+        Bedankt voor je boeking bij <strong>Cardetail.Exclusief</strong>! Hierbij bevestigen we je afspraak voor onze car detailing aan huis service.
       </p>
 
       <div class="info-box">
-        <p><strong>📅 Datum:</strong> ${date}</p>
-        <p><strong>🕒 Tijdstip:</strong> ${time}</p>
-        <p><strong>📍 Locatie:</strong> ${address}</p>
-        <p><strong>🚘 Diensten:</strong></p>
-        <ul style="margin: 5px 0; padding-left: 20px;">
+        <div class="info-row">
+          <span class="info-icon">📅</span>
+          <span class="info-label">Datum:</span>
+          <span class="info-value">${date}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-icon">🕒</span>
+          <span class="info-label">Tijdstip:</span>
+          <span class="info-value">${time}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-icon">📍</span>
+          <span class="info-label">Locatie:</span>
+          <span class="info-value">${address}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-icon">🚘</span>
+          <span class="info-label">Pakket:</span>
+        </div>
+        <ul class="service-list">
           ${servicesList}
         </ul>
-        <p><strong>💰 Totaalprijs:</strong> €${totalPrice.toFixed(2)}</p>
+        <div class="info-row" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(0, 191, 255, 0.2);">
+          <span class="info-icon">💰</span>
+          <span class="info-label">Totaalprijs:</span>
+          <span class="info-value" style="font-size: 18px; font-weight: 700; color: #00bfff;">€${totalPrice.toFixed(2)}</span>
+        </div>
       </div>
 
       <p>
         Onze specialist komt langs met alle benodigde materialen. Zorg voor toegang tot een stopcontact en watertoevoer in de buurt van de auto.
       </p>
+      
       <p>
-        <strong>Betaling:</strong> na afloop van de behandeling via contant of betaalverzoek (Tikkie).
+        <span class="highlight">Betaling:</span> na afloop van de behandeling via contant of betaalverzoek (Tikkie).
       </p>
+      
       <p>
-        Wil je de afspraak verplaatsen of annuleren? Laat het ons minstens <strong>24 uur van tevoren</strong> weten.
+        Wil je de afspraak verplaatsen of annuleren? Laat het ons minstens <span class="highlight">24 uur van tevoren</span> weten.
       </p>
 
-      <div style="text-align:center;">
+      <div class="btn-container">
         <a href="mailto:info@cardetailexclusief.nl?subject=Wijziging afspraak" class="btn">Afspraak wijzigen</a>
       </div>
 
       <p>
-        Wij kijken ernaar uit om jouw auto weer in showroomstaat te brengen!  
-        Vragen? Antwoord gerust op deze e-mail.
+        Wij kijken ernaar uit om jouw auto weer in showroomstaat te brengen! Vragen? Antwoord gerust op deze e-mail of bel ons.
       </p>
 
-      <p>Met vriendelijke groet,<br>
-      Het team van <strong>Cardetail.Exclusief</strong></p>
+      <p style="margin-top: 25px;">
+        Met vriendelijke groet,<br>
+        <strong>Het team van Cardetail.Exclusief</strong>
+      </p>
     </div>
     <div class="footer">
       <p>© 2025 Cardetail.Exclusief – Car detailing aan huis</p>
