@@ -459,10 +459,10 @@ const Booking = () => {
               </h1>
               <div className="gradient-card p-8 rounded-lg border border-border space-y-4">
                 <p className="text-lg text-muted-foreground">
-                  Uw afspraak is succesvol ingepland. U ontvangt binnen enkele minuten een bevestiging via WhatsApp en e-mail.
+                  Uw afspraak is succesvol ingepland. U ontvangt binnen enkele minuten een bevestiging via e-mail.
                 </p>
                 <p className="text-lg text-muted-foreground">
-                  <strong className="text-foreground">Belangrijk:</strong> Betaling gebeurt bij uitvoering van de dienst op locatie (contant of pin).
+                  <strong className="text-foreground">Belangrijk:</strong> Betaling gebeurt bij uitvoering van de dienst op locatie (Contant/tikkie of op factuur).
                 </p>
                 <p className="text-muted-foreground">
                   U ontvangt 24 uur voor uw afspraak een herinnering.
