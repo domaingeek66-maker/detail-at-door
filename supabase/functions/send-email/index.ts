@@ -37,7 +37,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('Gmail credentials not configured');
     }
 
-    console.log('Creating SMTP client...');
+    console.log('Creating Gmail SMTP client...');
 
     const body = await req.json();
 
@@ -52,8 +52,10 @@ const handler = async (req: Request): Promise<Response> => {
       let failCount = 0;
 
       for (const customer of customers) {
+        const client = new SmtpClient();
+        
         try {
-          const client = new SmtpClient();
+          console.log(`Connecting to Gmail SMTP for ${customer.email}...`);
           
           await client.connectTLS({
             hostname: "smtp.gmail.com",
@@ -61,6 +63,8 @@ const handler = async (req: Request): Promise<Response> => {
             username: gmailUser,
             password: gmailAppPassword,
           });
+
+          console.log(`Sending email to ${customer.email}...`);
 
           await client.send({
             from: gmailUser,
@@ -85,6 +89,11 @@ const handler = async (req: Request): Promise<Response> => {
           }
         } catch (error: any) {
           console.error(`✗ Failed to send email to ${customer.email}:`, error);
+          try {
+            await client.close();
+          } catch (e) {
+            // Ignore close errors
+          }
           results.push({
             email: customer.email,
             success: false,
@@ -146,7 +155,7 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error('Error in send-email function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error?.message || 'Unknown error' }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
