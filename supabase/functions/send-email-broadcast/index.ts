@@ -47,11 +47,100 @@ serve(async (req) => {
     for (const customer of customers) {
       try {
         const html = `
-          <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; line-height:1.6; color:#111">
-            <p>Beste ${customer.name || "klant"},</p>
-            <p>${message.replace(/\n/g, "<br/>")}</p>
-            <p style="margin-top:24px;color:#666">Vriendelijke groet,<br/>Cardetail Exclusief</p>
-          </div>
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${subject}</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      background-color: #000000;
+      color: #ffffff;
+    }
+    a {
+      color: #00bfff;
+      text-decoration: none;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #0a0a0a;
+    }
+    .header {
+      background: linear-gradient(180deg, #000000 0%, #0a0a0a 100%);
+      text-align: center;
+      padding: 40px 20px 30px 20px;
+    }
+    .header img {
+      max-width: 280px;
+      height: auto;
+    }
+    .content {
+      padding: 30px 30px 40px 30px;
+      line-height: 1.8;
+    }
+    .content p {
+      color: #e0e0e0;
+      margin: 15px 0;
+    }
+    .message-box {
+      background-color: #111111;
+      border: 1px solid rgba(0, 191, 255, 0.3);
+      border-radius: 12px;
+      padding: 25px;
+      margin: 25px 0;
+      color: #ffffff;
+      line-height: 1.8;
+    }
+    .highlight {
+      color: #00bfff;
+      font-weight: 600;
+    }
+    .footer {
+      background-color: #000000;
+      text-align: center;
+      padding: 25px 20px;
+      font-size: 13px;
+      color: #666666;
+      border-top: 1px solid #1a1a1a;
+    }
+    .footer p {
+      margin: 8px 0;
+    }
+    .footer a {
+      color: #00bfff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://cardetailexclusief.nl/logo-email.png" alt="Cardetail.Exclusief Logo">
+    </div>
+    <div class="content">
+      <p>Beste <strong>${customer.name || "klant"}</strong>,</p>
+
+      <div class="message-box">
+        ${message.replace(/\n/g, "<br/>")}
+      </div>
+
+      <p style="margin-top: 25px;">
+        Met vriendelijke groet,<br>
+        <strong>Het team van Cardetail.Exclusief</strong>
+      </p>
+    </div>
+    <div class="footer">
+      <p>© 2025 Cardetail.Exclusief – Car detailing aan huis</p>
+      <p><a href="https://cardetailexclusief.nl">cardetailexclusief.nl</a> | E-mail: info@cardetailexclusief.nl</p>
+      <p>Volg ons op Instagram: <a href="https://instagram.com/cardetail.exclusief">@cardetail.exclusief</a></p>
+    </div> 
+  </div>
+</body>
+</html>
         `;
 
         const result: any = await resend.emails.send({
