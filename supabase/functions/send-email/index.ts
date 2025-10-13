@@ -1,8 +1,9 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { Resend } from "npm:resend@2.0.0";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 interface EmailRequest {
@@ -15,156 +16,91 @@ interface EmailRequest {
 interface BroadcastRequest {
   subject: string;
   message: string;
-  customers: Array<{
-    name: string;
-    email: string;
-  }>;
+  customers: Array<{ name: string; email: string }>;
 }
 
-const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const emailJsServiceId = Deno.env.get('EMAILJS_SERVICE_ID');
-    const emailJsTemplateId = Deno.env.get('EMAILJS_TEMPLATE_ID');
-    const emailJsPublicKey = Deno.env.get('EMAILJS_PUBLIC_KEY');
-    const emailJsPrivateKey = Deno.env.get('EMAILJS_PRIVATE_KEY');
-
-    if (!emailJsServiceId || !emailJsTemplateId || !emailJsPublicKey || !emailJsPrivateKey) {
-      console.error('EmailJS credentials not configured');
-      throw new Error('EmailJS credentials not configured');
-    }
-
-    console.log('Using EmailJS for email sending...');
+    const apiKey = Deno.env.get("RESEND_API_KEY");
+    if (!apiKey) throw new Error("RESEND_API_KEY is not configured");
+    const resend = new Resend(apiKey);
 
     const body = await req.json();
 
-    // Check if this is a broadcast request
-    if ('customers' in body && Array.isArray(body.customers)) {
+    // Support both single email and broadcast (backwards compatible)
+    if (Array.isArray(body?.customers)) {
       const { subject, message, customers } = body as BroadcastRequest;
-      
-      console.log(`Starting broadcast to ${customers.length} customers`);
-      
-      const results = [];
+      console.log(`Starting Resend broadcast to ${customers.length} customers`);
+
+      const results: Array<{ email: string; success: boolean; error?: string }> = [];
       let successCount = 0;
       let failCount = 0;
 
-      for (const customer of customers) {
+      for (const c of customers) {
         try {
-          console.log(`Sending email via EmailJS to ${customer.email}...`);
+          const html = `
+            <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; line-height:1.6; color:#111">
+              <p>Beste ${c.name || "klant"},</p>
+              <p>${message.replace(/\n/g, "<br/>")}</p>
+              <p style="margin-top:24px;color:#666">Vriendelijke groet,<br/>Cardetail Exclusief</p>
+            </div>
+          `;
 
-          const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              service_id: emailJsServiceId,
-              template_id: emailJsTemplateId,
-              user_id: emailJsPublicKey,
-              accessToken: emailJsPrivateKey,
-              template_params: {
-                to_email: customer.email,
-                to_name: customer.name,
-                subject: subject,
-                message: message,
-              },
-            }),
+          const result: any = await resend.emails.send({
+            from: "Cardetail Exclusief <onboarding@resend.dev>",
+            to: [c.email],
+            subject,
+            html,
           });
 
-          if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`EmailJS API error: ${response.status} - ${errorText}`);
-          }
+          if (result?.error) throw new Error(result.error?.message || "Unknown Resend error");
 
-          console.log(`✓ Email sent successfully to ${customer.email}`);
-          results.push({
-            email: customer.email,
-            success: true,
-          });
+          console.log(`✓ Email sent successfully to ${c.email}`);
+          results.push({ email: c.email, success: true });
           successCount++;
-
-          // Add delay to avoid rate limiting (1 second between emails)
-          if (successCount < customers.length) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-          }
-        } catch (error: any) {
-          console.error(`✗ Failed to send email to ${customer.email}:`, error);
-          results.push({
-            email: customer.email,
-            success: false,
-            error: error?.message || 'Unknown error',
-          });
+          await new Promise((r) => setTimeout(r, 200));
+        } catch (error) {
+          const msg = error instanceof Error ? error.message : String(error);
+          console.error(`✗ Failed to send email to ${c.email}:`, msg);
+          results.push({ email: c.email, success: false, error: msg });
           failCount++;
         }
       }
 
-      console.log(`Broadcast complete: ${successCount} sent, ${failCount} failed`);
-
       return new Response(
-        JSON.stringify({
-          success: true,
-          totalSent: successCount,
-          totalFailed: failCount,
-          results: results,
-        }),
-        {
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
-    } else {
-      // Single email request
-      const { to, subject, html, text } = body as EmailRequest;
-
-      console.log(`Sending single email via EmailJS to ${to}`);
-
-      const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          service_id: emailJsServiceId,
-          template_id: emailJsTemplateId,
-          user_id: emailJsPublicKey,
-          accessToken: emailJsPrivateKey,
-          template_params: {
-            to_email: to,
-            subject: subject,
-            message: html,
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`EmailJS API error: ${response.status} - ${errorText}`);
-      }
-
-      console.log(`✓ Email sent successfully to ${to}`);
-
-      return new Response(
-        JSON.stringify({ success: true, message: 'Email sent successfully' }),
-        {
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
+        JSON.stringify({ success: true, totalSent: successCount, totalFailed: failCount, results }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-  } catch (error: any) {
-    console.error('Error in send-email function:', error);
-    return new Response(
-      JSON.stringify({ error: error?.message || 'Unknown error' }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    );
-  }
-};
 
-serve(handler);
+    // Single email
+    const { to, subject, html, text } = body as EmailRequest;
+    console.log(`Sending single email via Resend to ${to}`);
+
+    const result: any = await resend.emails.send({
+      from: "Cardetail Exclusief <onboarding@resend.dev>",
+      to: [to],
+      subject,
+      html,
+      text,
+    });
+
+    if (result?.error) throw new Error(result.error?.message || "Unknown Resend error");
+
+    return new Response(JSON.stringify({ success: true, message: "Email sent successfully" }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error("Error in send-email (Resend):", msg);
+    return new Response(JSON.stringify({ success: false, error: msg }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});

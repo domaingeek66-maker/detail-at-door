@@ -105,7 +105,7 @@ export default function AdminBroadcast() {
       console.error("Error sending broadcast:", error);
       toast({
         title: "Fout bij verzenden",
-        description: error.message || "Kon e-mails niet verzonden. Controleer of de EmailJS instellingen correct zijn.",
+        description: error.message || "Kon e-mails niet verzenden. Controleer of Resend is geconfigureerd en het domein is gevalideerd.",
         variant: "destructive",
       });
     } finally {
@@ -144,7 +144,7 @@ export default function AdminBroadcast() {
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2">E-mail Broadcast</h1>
         <p className="text-muted-foreground">
-          Verstuur e-mails naar alle klanten via EmailJS
+          Verstuur e-mails naar alle klanten via Resend
         </p>
       </div>
 

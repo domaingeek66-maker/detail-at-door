@@ -1,8 +1,9 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { Resend } from "npm:resend@2.0.0";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 interface Customer {
@@ -24,110 +25,72 @@ interface SendResult {
 }
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    const apiKey = Deno.env.get("RESEND_API_KEY");
+    if (!apiKey) {
+      throw new Error("RESEND_API_KEY is not configured");
+    }
+    const resend = new Resend(apiKey);
+
     const { subject, message, customers }: BroadcastRequest = await req.json();
 
-    console.log(`Starting email broadcast to ${customers.length} customers`);
-
-    const emailJsServiceId = Deno.env.get('EMAILJS_SERVICE_ID');
-    const emailJsTemplateId = Deno.env.get('EMAILJS_TEMPLATE_ID');
-    const emailJsPublicKey = Deno.env.get('EMAILJS_PUBLIC_KEY');
-    const emailJsPrivateKey = Deno.env.get('EMAILJS_PRIVATE_KEY');
-
-    if (!emailJsServiceId || !emailJsTemplateId || !emailJsPublicKey || !emailJsPrivateKey) {
-      console.error('EmailJS credentials not configured');
-      throw new Error('EmailJS credentials not configured');
-    }
-
-    console.log('Using EmailJS for broadcast emails...');
+    console.log(`Starting Resend broadcast to ${customers.length} customers`);
 
     const results: SendResult[] = [];
     let successCount = 0;
     let failCount = 0;
 
-    // Send email to each customer
     for (const customer of customers) {
       try {
-        console.log(`Sending email via EmailJS to ${customer.name} at ${customer.email}`);
+        const html = `
+          <div style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; line-height:1.6; color:#111">
+            <p>Beste ${customer.name || "klant"},</p>
+            <p>${message.replace(/\n/g, "<br/>")}</p>
+            <p style="margin-top:24px;color:#666">Vriendelijke groet,<br/>Cardetail Exclusief</p>
+          </div>
+        `;
 
-        const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            service_id: emailJsServiceId,
-            template_id: emailJsTemplateId,
-            user_id: emailJsPublicKey,
-            accessToken: emailJsPrivateKey,
-            template_params: {
-              to_email: customer.email,
-              to_name: customer.name,
-              subject: subject,
-              message: message,
-            },
-          }),
+        const result: any = await resend.emails.send({
+          from: "Cardetail Exclusief <onboarding@resend.dev>",
+          to: [customer.email],
+          subject,
+          html,
         });
 
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`EmailJS API error: ${response.status} - ${errorText}`);
+        if (result?.error) {
+          throw new Error(result.error?.message || "Unknown Resend error");
         }
 
-        console.log(`Successfully sent to ${customer.name}`);
+        console.log(`Successfully sent to ${customer.name} <${customer.email}>`);
         successCount++;
-        results.push({
-          customer: customer.name,
-          email: customer.email,
-          success: true,
-        });
+        results.push({ customer: customer.name, email: customer.email, success: true });
 
-        // Small delay between emails to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
+        // Gentle pacing
+        await new Promise((r) => setTimeout(r, 200));
       } catch (error) {
-        console.error(`Error sending to ${customer.name}:`, error);
+        const msg = error instanceof Error ? error.message : String(error);
+        console.error(`Error sending to ${customer.name}:`, msg);
         failCount++;
-        results.push({
-          customer: customer.name,
-          email: customer.email,
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-        });
+        results.push({ customer: customer.name, email: customer.email, success: false, error: msg });
       }
     }
 
     console.log(`Broadcast complete: ${successCount} successful, ${failCount} failed`);
 
     return new Response(
-      JSON.stringify({
-        success: true,
-        totalSent: successCount,
-        totalFailed: failCount,
-        results,
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      }
+      JSON.stringify({ success: true, totalSent: successCount, totalFailed: failCount, results }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-
   } catch (error) {
-    console.error('Error in send-email-broadcast function:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    return new Response(
-      JSON.stringify({ 
-        success: false,
-        error: errorMessage 
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    );
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error("Error in send-email-broadcast (Resend):", msg);
+    return new Response(JSON.stringify({ success: false, error: msg }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 });
