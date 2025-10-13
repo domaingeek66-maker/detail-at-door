@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -33,17 +34,24 @@ serve(async (req) => {
 
     console.log(`Starting email broadcast to ${customers.length} customers`);
 
-    const emailJsServiceId = Deno.env.get('EMAILJS_SERVICE_ID');
-    const emailJsTemplateId = Deno.env.get('EMAILJS_TEMPLATE_ID');
-    const emailJsPublicKey = Deno.env.get('EMAILJS_PUBLIC_KEY');
-    const emailJsPrivateKey = Deno.env.get('EMAILJS_PRIVATE_KEY');
+    const gmailUser = Deno.env.get('GMAIL_USER');
+    const gmailAppPassword = Deno.env.get('GMAIL_APP_PASSWORD');
 
-    if (!emailJsServiceId || !emailJsTemplateId || !emailJsPublicKey || !emailJsPrivateKey) {
-      console.error('EmailJS credentials not configured');
-      throw new Error('EmailJS credentials not configured');
+    if (!gmailUser || !gmailAppPassword) {
+      console.error('Gmail credentials not configured');
+      throw new Error('Gmail credentials not configured');
     }
 
-    console.log('Using EmailJS for broadcast emails...');
+    console.log('Using Gmail SMTP for broadcast emails...');
+
+    // Create SMTP client
+    const client = new SmtpClient();
+    await client.connectTLS({
+      hostname: "smtp.gmail.com",
+      port: 465,
+      username: gmailUser,
+      password: gmailAppPassword,
+    });
 
     const results: SendResult[] = [];
     let successCount = 0;
@@ -52,31 +60,29 @@ serve(async (req) => {
     // Send email to each customer
     for (const customer of customers) {
       try {
-        console.log(`Sending email via EmailJS to ${customer.name} at ${customer.email}`);
+        console.log(`Sending email via Gmail SMTP to ${customer.name} at ${customer.email}`);
 
-        const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            service_id: emailJsServiceId,
-            template_id: emailJsTemplateId,
-            user_id: emailJsPublicKey,
-            accessToken: emailJsPrivateKey,
-            template_params: {
-              to_email: customer.email,
-              to_name: customer.name,
-              subject: subject,
-              message: message,
-            },
-          }),
+        const htmlContent = `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2>Hallo ${customer.name},</h2>
+            <div style="line-height: 1.6;">
+              ${message.replace(/\n/g, '<br>')}
+            </div>
+            <br>
+            <p style="color: #666;">
+              Met vriendelijke groet,<br>
+              Car Detail Exclusief
+            </p>
+          </div>
+        `;
+
+        await client.send({
+          from: gmailUser,
+          to: customer.email,
+          subject: subject,
+          content: htmlContent,
+          html: htmlContent,
         });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`EmailJS API error: ${response.status} - ${errorText}`);
-        }
 
         console.log(`Successfully sent to ${customer.name}`);
         successCount++;
@@ -102,6 +108,9 @@ serve(async (req) => {
     }
 
     console.log(`Broadcast complete: ${successCount} successful, ${failCount} failed`);
+    
+    // Close SMTP connection
+    await client.close();
 
     return new Response(
       JSON.stringify({
