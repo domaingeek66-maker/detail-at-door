@@ -219,18 +219,9 @@ const Booking = () => {
 
       // Update discount code usage if applied
       if (appliedDiscount) {
-        const { data: currentDiscount } = await supabase
-          .from('discount_codes')
-          .select('times_used')
-          .eq('id', appliedDiscount.id)
-          .single();
-        
-        if (currentDiscount) {
-          await supabase
-            .from('discount_codes')
-            .update({ times_used: currentDiscount.times_used + 1 })
-            .eq('id', appliedDiscount.id);
-        }
+        await supabase.rpc('increment_discount_usage', {
+          _discount_id: appliedDiscount.id
+        });
       }
 
       // Send booking confirmation email
@@ -315,62 +306,38 @@ const Booking = () => {
     setDiscountError("");
 
     try {
-      const { data, error } = await supabase
-        .from('discount_codes')
-        .select('*')
-        .eq('code', discountCode.toUpperCase())
-        .eq('is_active', true)
-        .single();
-
-      if (error || !data) {
-        setDiscountError("Ongeldige kortingscode");
-        setAppliedDiscount(null);
-        return;
-      }
-
-      const now = new Date();
-      const validFrom = new Date(data.valid_from);
-      const validUntil = data.valid_until ? new Date(data.valid_until) : null;
-
-      if (now < validFrom) {
-        setDiscountError("Deze kortingscode is nog niet geldig");
-        setAppliedDiscount(null);
-        return;
-      }
-
-      if (validUntil && now > validUntil) {
-        setDiscountError("Deze kortingscode is verlopen");
-        setAppliedDiscount(null);
-        return;
-      }
-
-      if (data.max_uses && data.times_used >= data.max_uses) {
-        setDiscountError("Deze kortingscode is niet meer geldig");
-        setAppliedDiscount(null);
-        return;
-      }
-
       const totalPrice = calculateTotalPrice();
       
-      if (totalPrice < data.min_order_amount) {
-        setDiscountError(`Minimaal bestelbedrag is €${data.min_order_amount}`);
+      // Use secure server-side validation
+      const { data, error } = await supabase
+        .rpc('validate_discount_code', {
+          _code: discountCode,
+          _total_price: totalPrice
+        })
+        .single();
+
+      if (error) {
+        console.error("Error validating discount:", error);
+        setDiscountError("Fout bij valideren kortingscode");
         setAppliedDiscount(null);
         return;
       }
 
-      const discountAmount = data.discount_type === 'percentage'
-        ? (totalPrice * data.discount_value) / 100
-        : data.discount_value;
+      if (!data.valid) {
+        setDiscountError(data.error_message || "Ongeldige kortingscode");
+        setAppliedDiscount(null);
+        return;
+      }
 
       setAppliedDiscount({
-        id: data.id,
-        code: data.code,
+        id: data.discount_id,
+        code: data.discount_code,
         type: data.discount_type as 'percentage' | 'fixed',
         value: data.discount_value,
-        amount: Math.min(discountAmount, totalPrice),
+        amount: data.discount_amount,
       });
 
-      toast.success(`Kortingscode toegepast! €${Math.min(discountAmount, totalPrice).toFixed(2)} korting`);
+      toast.success(`Kortingscode toegepast! €${data.discount_amount.toFixed(2)} korting`);
     } catch (error) {
       console.error("Error validating discount:", error);
       setDiscountError("Fout bij valideren kortingscode");

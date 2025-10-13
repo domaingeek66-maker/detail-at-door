@@ -443,6 +443,23 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_discount_usage: {
+        Args: { _discount_id: string }
+        Returns: undefined
+      }
+      validate_discount_code: {
+        Args: { _code: string; _total_price: number }
+        Returns: {
+          discount_amount: number
+          discount_code: string
+          discount_id: string
+          discount_type: string
+          discount_value: number
+          error_message: string
+          final_price: number
+          valid: boolean
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "customer"
