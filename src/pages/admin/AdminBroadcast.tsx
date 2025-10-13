@@ -77,7 +77,7 @@ export default function AdminBroadcast() {
     setIsSending(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke("send-email-broadcast", {
+      const { data, error } = await supabase.functions.invoke("send-email", {
         body: {
           subject: subject.trim(),
           message: message.trim(),
