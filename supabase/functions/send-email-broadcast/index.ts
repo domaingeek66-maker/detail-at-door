@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.58.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -34,49 +33,17 @@ serve(async (req) => {
 
     console.log(`Starting email broadcast to ${customers.length} customers`);
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const emailJsServiceId = Deno.env.get('EMAILJS_SERVICE_ID');
+    const emailJsTemplateId = Deno.env.get('EMAILJS_TEMPLATE_ID');
+    const emailJsPublicKey = Deno.env.get('EMAILJS_PUBLIC_KEY');
+    const emailJsPrivateKey = Deno.env.get('EMAILJS_PRIVATE_KEY');
 
-    // Fetch Gmail OAuth credentials from settings
-    const { data: settings, error: settingsError } = await supabase
-      .from('settings')
-      .select('key, value')
-      .in('key', ['gmail_user', 'gmail_client_id', 'gmail_client_secret', 'gmail_refresh_token']);
-
-    if (settingsError) {
-      throw new Error(`Failed to fetch settings: ${settingsError.message}`);
+    if (!emailJsServiceId || !emailJsTemplateId || !emailJsPublicKey || !emailJsPrivateKey) {
+      console.error('EmailJS credentials not configured');
+      throw new Error('EmailJS credentials not configured');
     }
 
-    const gmailUser = settings?.find(s => s.key === 'gmail_user')?.value;
-    const clientId = settings?.find(s => s.key === 'gmail_client_id')?.value;
-    const clientSecret = settings?.find(s => s.key === 'gmail_client_secret')?.value;
-    const refreshToken = settings?.find(s => s.key === 'gmail_refresh_token')?.value;
-
-    if (!gmailUser || !clientId || !clientSecret || !refreshToken) {
-      throw new Error('Gmail OAuth credentials not configured. Please set gmail_user, gmail_client_id, gmail_client_secret, and gmail_refresh_token in Admin Settings.');
-    }
-
-    console.log(`Using Gmail account: ${gmailUser}`);
-
-    // Get access token from refresh token
-    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        client_id: clientId,
-        client_secret: clientSecret,
-        refresh_token: refreshToken,
-        grant_type: 'refresh_token',
-      }),
-    });
-
-    if (!tokenResponse.ok) {
-      const errorText = await tokenResponse.text();
-      throw new Error(`Failed to refresh Gmail access token: ${errorText}`);
-    }
-
-    const { access_token } = await tokenResponse.json();
+    console.log('Using EmailJS for broadcast emails...');
 
     const results: SendResult[] = [];
     let successCount = 0;
@@ -85,46 +52,33 @@ serve(async (req) => {
     // Send email to each customer
     for (const customer of customers) {
       try {
-        console.log(`Sending email to ${customer.name} at ${customer.email}`);
+        console.log(`Sending email via EmailJS to ${customer.name} at ${customer.email}`);
 
-        // Create RFC 2822 formatted email
-        const emailContent = [
-          `From: ${gmailUser}`,
-          `To: ${customer.email}`,
-          `Subject: ${subject}`,
-          `Content-Type: text/plain; charset=utf-8`,
-          '',
-          `Beste ${customer.name},`,
-          '',
-          message,
-          '',
-          'Met vriendelijke groet,',
-          'Car Detail Exclusief',
-        ].join('\r\n');
-
-        // Base64url encode the email
-        const encodedEmail = btoa(emailContent)
-          .replace(/\+/g, '-')
-          .replace(/\//g, '_')
-          .replace(/=+$/, '');
-
-        // Send via Gmail API
-        const sendResponse = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+        const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${access_token}`,
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ raw: encodedEmail }),
+          body: JSON.stringify({
+            service_id: emailJsServiceId,
+            template_id: emailJsTemplateId,
+            user_id: emailJsPublicKey,
+            accessToken: emailJsPrivateKey,
+            template_params: {
+              to_email: customer.email,
+              to_name: customer.name,
+              subject: subject,
+              message: message,
+            },
+          }),
         });
 
-        if (!sendResponse.ok) {
-          const errorData = await sendResponse.json();
-          throw new Error(errorData.error?.message || 'Failed to send email');
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`EmailJS API error: ${response.status} - ${errorText}`);
         }
 
-        const responseData = await sendResponse.json();
-        console.log(`Successfully sent to ${customer.name}:`, responseData.id);
+        console.log(`Successfully sent to ${customer.name}`);
         successCount++;
         results.push({
           customer: customer.name,
