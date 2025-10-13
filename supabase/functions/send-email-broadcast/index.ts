@@ -137,7 +137,7 @@ serve(async (req) => {
       <p>© 2025 Cardetail.Exclusief – Car detailing aan huis</p>
       <p><a href="https://cardetailexclusief.nl">cardetailexclusief.nl</a> | E-mail: info@cardetailexclusief.nl</p>
       <p>Volg ons op Instagram: <a href="https://instagram.com/cardetail.exclusief">@cardetail.exclusief</a></p>
-      <p style="margin-top: 15px; color: #444;">Built with ❤️ by <a href="https://ontwikkelaars.dev" style="color: #00bfff;">ontwikkelaars.dev</a></p>
+      <p style="margin-top: 15px; color: #444;">Built by <a href="https://ontwikkelaars.dev" style="color: #00bfff;">Ontwikkelaars.dev</a></p>
     </div>
   </div>
 </body>
