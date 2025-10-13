@@ -19,6 +19,17 @@ interface BroadcastRequest {
   customers: Array<{ name: string; email: string }>;
 }
 
+interface BookingConfirmationRequest {
+  type: 'booking_confirmation';
+  customerName: string;
+  customerEmail: string;
+  date: string;
+  time: string;
+  address: string;
+  services: string[];
+  totalPrice: number;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -30,6 +41,170 @@ serve(async (req) => {
     const resend = new Resend(apiKey);
 
     const body = await req.json();
+
+    // Handle booking confirmation emails
+    if (body?.type === 'booking_confirmation') {
+      const { customerName, customerEmail, date, time, address, services, totalPrice } = body as BookingConfirmationRequest;
+      console.log(`Sending booking confirmation to ${customerEmail}`);
+
+      const servicesList = services.map(s => `<li style="margin: 4px 0;">${s}</li>`).join('');
+
+      const html = `
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bevestiging van je boeking – Cardetail.Exclusief</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      background-color: #0a0a0a;
+      color: #eaeaea;
+    }
+    a {
+      color: #00bfff;
+      text-decoration: none;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #111111;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(0, 191, 255, 0.2);
+    }
+    .header {
+      background-color: #000000;
+      text-align: center;
+      padding: 30px 0 10px 0;
+    }
+    .header img {
+      max-width: 180px;
+      height: auto;
+    }
+    .content {
+      padding: 30px;
+      line-height: 1.7;
+    }
+    .content h1 {
+      color: #00bfff;
+      font-size: 24px;
+      margin-top: 0;
+      text-align: center;
+    }
+    .info-box {
+      background-color: #1a1a1a;
+      border: 1px solid #00bfff33;
+      padding: 20px;
+      border-radius: 6px;
+      margin: 20px 0;
+    }
+    .info-box p {
+      margin: 8px 0;
+    }
+    .btn {
+      display: inline-block;
+      background-color: #00bfff;
+      color: #ffffff;
+      font-weight: bold;
+      text-align: center;
+      padding: 12px 25px;
+      border-radius: 4px;
+      margin: 25px 0 10px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .btn:hover {
+      background-color: #0095cc;
+    }
+    .footer {
+      background-color: #000000;
+      text-align: center;
+      padding: 20px;
+      font-size: 12px;
+      color: #888;
+    }
+    .footer a {
+      color: #00bfff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2 style="color: #00bfff; margin: 20px 0;">Cardetail.Exclusief</h2>
+    </div>
+    <div class="content">
+      <h1>Bevestiging van je boeking</h1>
+
+      <p>Beste <strong>${customerName}</strong>,</p>
+
+      <p>
+        Bedankt voor je boeking bij <strong>Cardetail.Exclusief</strong>!  
+        Hierbij bevestigen we je afspraak voor onze car detailing aan huis service.
+      </p>
+
+      <div class="info-box">
+        <p><strong>📅 Datum:</strong> ${date}</p>
+        <p><strong>🕒 Tijdstip:</strong> ${time}</p>
+        <p><strong>📍 Locatie:</strong> ${address}</p>
+        <p><strong>🚘 Diensten:</strong></p>
+        <ul style="margin: 5px 0; padding-left: 20px;">
+          ${servicesList}
+        </ul>
+        <p><strong>💰 Totaalprijs:</strong> €${totalPrice.toFixed(2)}</p>
+      </div>
+
+      <p>
+        Onze specialist komt langs met alle benodigde materialen. Zorg voor toegang tot een stopcontact en watertoevoer in de buurt van de auto.
+      </p>
+      <p>
+        <strong>Betaling:</strong> na afloop van de behandeling via contant of betaalverzoek (Tikkie).
+      </p>
+      <p>
+        Wil je de afspraak verplaatsen of annuleren? Laat het ons minstens <strong>24 uur van tevoren</strong> weten.
+      </p>
+
+      <div style="text-align:center;">
+        <a href="mailto:info@cardetailexclusief.nl?subject=Wijziging afspraak" class="btn">Afspraak wijzigen</a>
+      </div>
+
+      <p>
+        Wij kijken ernaar uit om jouw auto weer in showroomstaat te brengen!  
+        Vragen? Antwoord gerust op deze e-mail.
+      </p>
+
+      <p>Met vriendelijke groet,<br>
+      Het team van <strong>Cardetail.Exclusief</strong></p>
+    </div>
+    <div class="footer">
+      <p>© 2025 Cardetail.Exclusief – Car detailing aan huis</p>
+      <p><a href="https://cardetailexclusief.nl">cardetailexclusief.nl</a> | E-mail: info@cardetailexclusief.nl</p>
+      <p>Volg ons op Instagram: <a href="https://instagram.com/cardetail.exclusief">@cardetail.exclusief</a></p>
+    </div> 
+  </div>
+</body>
+</html>
+      `;
+
+      const result: any = await resend.emails.send({
+        from: "Cardetail Exclusief <info@cardetailexclusief.nl>",
+        to: [customerEmail],
+        subject: "Bevestiging van je boeking - Cardetail.Exclusief",
+        html,
+      });
+
+      if (result?.error) throw new Error(result.error?.message || "Unknown Resend error");
+
+      console.log("Booking confirmation email sent successfully");
+      return new Response(JSON.stringify({ success: true, message: "Booking confirmation sent" }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Support both single email and broadcast (backwards compatible)
     if (Array.isArray(body?.customers)) {

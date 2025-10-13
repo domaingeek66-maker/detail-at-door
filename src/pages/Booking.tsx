@@ -232,6 +232,31 @@ const Booking = () => {
             .eq('id', appliedDiscount.id);
         }
       }
+
+      // Send booking confirmation email
+      const serviceNames = services?.filter(s => selectedServices.includes(s.id)).map(s => {
+        const quantity = serviceQuantities[s.id] || 1;
+        return quantity > 1 ? `${s.name} (${quantity}x)` : s.name;
+      }) || [];
+
+      try {
+        await supabase.functions.invoke('send-email', {
+          body: {
+            type: 'booking_confirmation',
+            customerName: formData.name,
+            customerEmail: formData.email,
+            date: format(selectedDate!, 'EEEE d MMMM yyyy', { locale: nl }),
+            time: selectedTime,
+            address: `${formData.streetAddress}, ${formData.postalCode} ${formData.city}`,
+            services: serviceNames,
+            totalPrice: finalPrice,
+          },
+        });
+        console.log('Booking confirmation email sent');
+      } catch (emailError) {
+        console.error('Failed to send confirmation email:', emailError);
+        // Don't fail the booking if email fails
+      }
     },
     onSuccess: () => {
       setStep(5);
