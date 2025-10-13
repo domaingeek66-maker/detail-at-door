@@ -90,9 +90,13 @@ export default function AdminBroadcast() {
 
       if (error) throw error;
 
+      const totalSent = (data as any)?.totalSent ?? 0;
+      const totalFailed = (data as any)?.totalFailed ?? 0;
+
       toast({
-        title: "Succesvol verzonden",
-        description: `E-mails verzonden naar ${customers.length} klanten`,
+        title: totalFailed > 0 ? "Verzenden deels mislukt" : "Succesvol verzonden",
+        description: `Verzonden: ${totalSent} • Mislukt: ${totalFailed}`,
+        variant: totalFailed > 0 ? "destructive" : undefined,
       });
 
       setSubject("");
