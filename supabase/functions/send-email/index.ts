@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
+import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -33,21 +33,11 @@ const handler = async (req: Request): Promise<Response> => {
     const gmailAppPassword = Deno.env.get('GMAIL_APP_PASSWORD');
 
     if (!gmailUser || !gmailAppPassword) {
+      console.error('Gmail credentials not configured');
       throw new Error('Gmail credentials not configured');
     }
 
-    // Initialize SMTP client
-    const client = new SMTPClient({
-      connection: {
-        hostname: "smtp.gmail.com",
-        port: 465,
-        tls: true,
-        auth: {
-          username: gmailUser,
-          password: gmailAppPassword,
-        },
-      },
-    });
+    console.log('Creating SMTP client...');
 
     const body = await req.json();
 
@@ -55,21 +45,34 @@ const handler = async (req: Request): Promise<Response> => {
     if ('customers' in body && Array.isArray(body.customers)) {
       const { subject, message, customers } = body as BroadcastRequest;
       
+      console.log(`Starting broadcast to ${customers.length} customers`);
+      
       const results = [];
       let successCount = 0;
       let failCount = 0;
 
       for (const customer of customers) {
         try {
+          const client = new SmtpClient();
+          
+          await client.connectTLS({
+            hostname: "smtp.gmail.com",
+            port: 465,
+            username: gmailUser,
+            password: gmailAppPassword,
+          });
+
           await client.send({
             from: gmailUser,
             to: customer.email,
             subject: subject,
-            content: message,
+            content: message.replace(/<[^>]*>/g, ''),
             html: message,
           });
 
-          console.log(`Email sent successfully to ${customer.email}`);
+          await client.close();
+
+          console.log(`✓ Email sent successfully to ${customer.email}`);
           results.push({
             email: customer.email,
             success: true,
@@ -77,19 +80,21 @@ const handler = async (req: Request): Promise<Response> => {
           successCount++;
 
           // Add delay to avoid rate limiting (1 second between emails)
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        } catch (error) {
-          console.error(`Failed to send email to ${customer.email}:`, error);
+          if (successCount < customers.length) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        } catch (error: any) {
+          console.error(`✗ Failed to send email to ${customer.email}:`, error);
           results.push({
             email: customer.email,
             success: false,
-            error: error.message,
+            error: error?.message || 'Unknown error',
           });
           failCount++;
         }
       }
 
-      await client.close();
+      console.log(`Broadcast complete: ${successCount} sent, ${failCount} failed`);
 
       return new Response(
         JSON.stringify({
@@ -107,17 +112,28 @@ const handler = async (req: Request): Promise<Response> => {
       // Single email request
       const { to, subject, html, text } = body as EmailRequest;
 
+      console.log(`Sending single email to ${to}`);
+
+      const client = new SmtpClient();
+      
+      await client.connectTLS({
+        hostname: "smtp.gmail.com",
+        port: 465,
+        username: gmailUser,
+        password: gmailAppPassword,
+      });
+
       await client.send({
         from: gmailUser,
         to: to,
         subject: subject,
-        content: text || '',
+        content: text || html.replace(/<[^>]*>/g, ''),
         html: html,
       });
 
       await client.close();
 
-      console.log(`Email sent successfully to ${to}`);
+      console.log(`✓ Email sent successfully to ${to}`);
 
       return new Response(
         JSON.stringify({ success: true, message: 'Email sent successfully' }),
