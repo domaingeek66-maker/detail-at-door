@@ -285,6 +285,221 @@ serve(async (req) => {
       if (result?.error) throw new Error(result.error?.message || "Unknown Resend error");
 
       console.log("Booking confirmation email sent successfully");
+
+      // Send admin notification email
+      const adminHtml = `
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nieuwe Boeking - Cardetail.Exclusief</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      background-color: #000000;
+      color: #ffffff;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #0a0a0a;
+    }
+    .header {
+      background: linear-gradient(180deg, #000000 0%, #0a0a0a 100%);
+      text-align: center;
+      padding: 40px 20px 30px 20px;
+    }
+    .header img {
+      max-width: 200px;
+      height: auto;
+      margin-bottom: 20px;
+    }
+    .header h1 {
+      color: #00bfff;
+      font-size: 28px;
+      font-weight: 600;
+      margin: 0;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .content {
+      padding: 30px 30px 40px 30px;
+      line-height: 1.8;
+    }
+    .content p {
+      color: #e0e0e0;
+      margin: 15px 0;
+    }
+    .info-box {
+      background-color: #111111;
+      border: 1px solid rgba(0, 191, 255, 0.3);
+      border-radius: 12px;
+      padding: 25px;
+      margin: 30px 0;
+    }
+    .info-row {
+      display: flex;
+      align-items: flex-start;
+      margin: 12px 0;
+      color: #ffffff;
+    }
+    .info-icon {
+      font-size: 20px;
+      margin-right: 12px;
+      min-width: 24px;
+    }
+    .info-label {
+      font-weight: 600;
+      color: #00bfff;
+      margin-right: 8px;
+    }
+    .info-value {
+      color: #ffffff;
+    }
+    .service-list {
+      margin: 8px 0 0 36px;
+      padding: 0;
+      list-style: none;
+    }
+    .service-list li {
+      color: #ffffff;
+      margin: 6px 0;
+      padding-left: 16px;
+      position: relative;
+    }
+    .service-list li:before {
+      content: "•";
+      color: #00bfff;
+      font-weight: bold;
+      position: absolute;
+      left: 0;
+    }
+    .alert-box {
+      background-color: rgba(0, 191, 255, 0.1);
+      border-left: 4px solid #00bfff;
+      padding: 20px;
+      margin: 25px 0;
+      border-radius: 6px;
+    }
+    .alert-box p {
+      margin: 0;
+      color: #ffffff;
+      font-weight: 600;
+    }
+    .footer {
+      background-color: #000000;
+      text-align: center;
+      padding: 25px 20px;
+      font-size: 13px;
+      color: #666666;
+      border-top: 1px solid #1a1a1a;
+    }
+    .footer p {
+      margin: 8px 0;
+    }
+    .footer a {
+      color: #00bfff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://i.postimg.cc/1zyMk2Gg/Cardetail.png" alt="Cardetail.Exclusief Logo">
+      <h1>🎉 Nieuwe Boeking!</h1>
+    </div>
+    <div class="content">
+      <div class="alert-box">
+        <p>Je hebt een nieuwe boeking ontvangen!</p>
+      </div>
+
+      <p><strong>Klantgegevens:</strong></p>
+      <div class="info-box">
+        <div class="info-row">
+          <span class="info-icon">👤</span>
+          <span class="info-label">Naam:</span>
+          <span class="info-value">${customerName}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-icon">📧</span>
+          <span class="info-label">Email:</span>
+          <span class="info-value">${customerEmail}</span>
+        </div>
+      </div>
+
+      <p><strong>Afspraak details:</strong></p>
+      <div class="info-box">
+        <div class="info-row">
+          <span class="info-icon">📅</span>
+          <span class="info-label">Datum:</span>
+          <span class="info-value">${date}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-icon">🕒</span>
+          <span class="info-label">Tijdstip:</span>
+          <span class="info-value">${time}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-icon">📍</span>
+          <span class="info-label">Locatie:</span>
+          <span class="info-value">${address}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-icon">🚘</span>
+          <span class="info-label">Pakket:</span>
+        </div>
+        <ul class="service-list">
+          ${servicesList}
+        </ul>
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(0, 191, 255, 0.2);">
+          <div class="info-row">
+            <span class="info-icon">💰</span>
+            <span class="info-label">Subtotaal (excl. BTW):</span>
+            <span class="info-value">€${subtotal.toFixed(2)}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-icon"></span>
+            <span class="info-label">BTW (21%):</span>
+            <span class="info-value">€${btw.toFixed(2)}</span>
+          </div>
+          <div class="info-row" style="margin-top: 8px; padding-top: 12px; border-top: 1px solid rgba(0, 191, 255, 0.15);">
+            <span class="info-icon"></span>
+            <span class="info-label">Totaal (incl. BTW):</span>
+            <span class="info-value" style="font-size: 18px; font-weight: 700; color: #00bfff;">€${totalPrice.toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
+
+      <p style="margin-top: 25px;">
+        Bekijk alle details in je admin dashboard.
+      </p>
+    </div>
+    <div class="footer">
+      <p>© 2025 Cardetail.Exclusief – Car detailing aan huis</p>
+      <p><a href="https://cardetailexclusief.nl">cardetailexclusief.nl</a></p>
+      <p style="margin-top: 15px; color: #444;">Built with ❤️ by <a href="https://ontwikkelaars.dev" style="color: #00bfff;">ontwikkelaars.dev</a></p>
+    </div>
+  </div>
+</body>
+</html>
+      `;
+
+      try {
+        await resend.emails.send({
+          from: "Cardetail Exclusief <info@cardetailexclusief.nl>",
+          to: ["cardetail.exclusief@gmail.com"],
+          subject: "🎉 Nieuwe Boeking Ontvangen!",
+          html: adminHtml,
+        });
+        console.log("Admin notification email sent successfully");
+      } catch (adminEmailError) {
+        console.error("Failed to send admin notification:", adminEmailError);
+        // Don't fail the entire request if admin email fails
+      }
+
       return new Response(JSON.stringify({ success: true, message: "Booking confirmation sent" }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
