@@ -55,7 +55,7 @@ serve(async (req) => {
         `;
 
         const result: any = await resend.emails.send({
-          from: "Cardetail Exclusief <onboarding@resend.dev>",
+          from: "Cardetail Exclusief <info@cardetailexclusief.nl>",
           to: [customer.email],
           subject,
           html,
@@ -69,8 +69,8 @@ serve(async (req) => {
         successCount++;
         results.push({ customer: customer.name, email: customer.email, success: true });
 
-        // Gentle pacing
-        await new Promise((r) => setTimeout(r, 200));
+        // Rate limit protection: 700ms between emails (max ~1.4 emails/sec)
+        await new Promise((r) => setTimeout(r, 700));
       } catch (error) {
         const msg = error instanceof Error ? error.message : String(error);
         console.error(`Error sending to ${customer.name}:`, msg);

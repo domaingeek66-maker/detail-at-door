@@ -51,7 +51,7 @@ serve(async (req) => {
           `;
 
           const result: any = await resend.emails.send({
-            from: "Cardetail Exclusief <onboarding@resend.dev>",
+            from: "Cardetail Exclusief <info@cardetailexclusief.nl>",
             to: [c.email],
             subject,
             html,
@@ -62,7 +62,7 @@ serve(async (req) => {
           console.log(`✓ Email sent successfully to ${c.email}`);
           results.push({ email: c.email, success: true });
           successCount++;
-          await new Promise((r) => setTimeout(r, 200));
+          await new Promise((r) => setTimeout(r, 700));
         } catch (error) {
           const msg = error instanceof Error ? error.message : String(error);
           console.error(`✗ Failed to send email to ${c.email}:`, msg);
@@ -82,7 +82,7 @@ serve(async (req) => {
     console.log(`Sending single email via Resend to ${to}`);
 
     const result: any = await resend.emails.send({
-      from: "Cardetail Exclusief <onboarding@resend.dev>",
+      from: "Cardetail Exclusief <info@cardetailexclusief.nl>",
       to: [to],
       subject,
       html,
