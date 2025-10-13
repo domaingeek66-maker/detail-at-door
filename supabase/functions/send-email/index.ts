@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -29,15 +28,17 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const gmailUser = Deno.env.get('GMAIL_USER');
-    const gmailAppPassword = Deno.env.get('GMAIL_APP_PASSWORD');
+    const emailJsServiceId = Deno.env.get('EMAILJS_SERVICE_ID');
+    const emailJsTemplateId = Deno.env.get('EMAILJS_TEMPLATE_ID');
+    const emailJsPublicKey = Deno.env.get('EMAILJS_PUBLIC_KEY');
+    const emailJsPrivateKey = Deno.env.get('EMAILJS_PRIVATE_KEY');
 
-    if (!gmailUser || !gmailAppPassword) {
-      console.error('Gmail credentials not configured');
-      throw new Error('Gmail credentials not configured');
+    if (!emailJsServiceId || !emailJsTemplateId || !emailJsPublicKey || !emailJsPrivateKey) {
+      console.error('EmailJS credentials not configured');
+      throw new Error('EmailJS credentials not configured');
     }
 
-    console.log('Creating Gmail SMTP client...');
+    console.log('Using EmailJS for email sending...');
 
     const body = await req.json();
 
@@ -52,29 +53,32 @@ const handler = async (req: Request): Promise<Response> => {
       let failCount = 0;
 
       for (const customer of customers) {
-        const client = new SmtpClient();
-        
         try {
-          console.log(`Connecting to Gmail SMTP for ${customer.email}...`);
-          
-          await client.connectTLS({
-            hostname: "smtp.gmail.com",
-            port: 465,
-            username: gmailUser,
-            password: gmailAppPassword,
+          console.log(`Sending email via EmailJS to ${customer.email}...`);
+
+          const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              service_id: emailJsServiceId,
+              template_id: emailJsTemplateId,
+              user_id: emailJsPublicKey,
+              accessToken: emailJsPrivateKey,
+              template_params: {
+                to_email: customer.email,
+                to_name: customer.name,
+                subject: subject,
+                message: message,
+              },
+            }),
           });
 
-          console.log(`Sending email to ${customer.email}...`);
-
-          await client.send({
-            from: gmailUser,
-            to: customer.email,
-            subject: subject,
-            content: message.replace(/<[^>]*>/g, ''),
-            html: message,
-          });
-
-          await client.close();
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`EmailJS API error: ${response.status} - ${errorText}`);
+          }
 
           console.log(`✓ Email sent successfully to ${customer.email}`);
           results.push({
@@ -89,11 +93,6 @@ const handler = async (req: Request): Promise<Response> => {
           }
         } catch (error: any) {
           console.error(`✗ Failed to send email to ${customer.email}:`, error);
-          try {
-            await client.close();
-          } catch (e) {
-            // Ignore close errors
-          }
           results.push({
             email: customer.email,
             success: false,
@@ -121,26 +120,30 @@ const handler = async (req: Request): Promise<Response> => {
       // Single email request
       const { to, subject, html, text } = body as EmailRequest;
 
-      console.log(`Sending single email to ${to}`);
+      console.log(`Sending single email via EmailJS to ${to}`);
 
-      const client = new SmtpClient();
-      
-      await client.connectTLS({
-        hostname: "smtp.gmail.com",
-        port: 465,
-        username: gmailUser,
-        password: gmailAppPassword,
+      const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          service_id: emailJsServiceId,
+          template_id: emailJsTemplateId,
+          user_id: emailJsPublicKey,
+          accessToken: emailJsPrivateKey,
+          template_params: {
+            to_email: to,
+            subject: subject,
+            message: html,
+          },
+        }),
       });
 
-      await client.send({
-        from: gmailUser,
-        to: to,
-        subject: subject,
-        content: text || html.replace(/<[^>]*>/g, ''),
-        html: html,
-      });
-
-      await client.close();
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`EmailJS API error: ${response.status} - ${errorText}`);
+      }
 
       console.log(`✓ Email sent successfully to ${to}`);
 
