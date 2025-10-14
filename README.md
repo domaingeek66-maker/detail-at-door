@@ -1,73 +1,44 @@
-# Welcome to your Lovable project
+# Cardetail Exclusief
 
-## Project info
+## Over dit project
 
-**URL**: https://lovable.dev/projects/f5605922-fc9f-4144-9165-060c3238ff29
+Premium car detailing service website gebouwd met moderne webtechnologieën.
 
-## How can I edit this code?
+## Installatie
 
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/f5605922-fc9f-4144-9165-060c3238ff29) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Zorg ervoor dat je Node.js & npm geïnstalleerd hebt - [installeer met nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Clone de repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
+# Ga naar de project directory
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Installeer dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start de development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Gebruikte technologieën
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
+Dit project is gebouwd met:
 
 - Vite
 - TypeScript
 - React
 - shadcn-ui
 - Tailwind CSS
+- Supabase (backend & database)
 
-## How can I deploy this project?
+## Deployment
 
-Simply open [Lovable](https://lovable.dev/projects/f5605922-fc9f-4144-9165-060c3238ff29) and click on Share -> Publish.
+Build het project voor productie:
 
-## Can I connect a custom domain to my Lovable project?
+```sh
+npm run build
+```
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+De gebouwde bestanden staan in de `dist/` directory en kunnen gehost worden op elke static hosting service.
