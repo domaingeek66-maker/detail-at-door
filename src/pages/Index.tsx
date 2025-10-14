@@ -11,13 +11,15 @@ const Index = () => {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     "name": "Cardetail Exclusief",
-    "description": "Premium car detailing service aan huis",
-    "url": "https://cardetail-exclusief.nl",
+    "description": "Premium car detailing service aan huis in heel Nederland. Professionele interieur & exterieur reiniging, ceramic coating en meer.",
+    "url": "https://cardetailexclusief.nl",
     "telephone": "+31612345678",
     "priceRange": "€€",
+    "image": "https://cardetailexclusief.nl/logo-email.png",
     "address": {
       "@type": "PostalAddress",
-      "addressCountry": "NL"
+      "addressCountry": "NL",
+      "addressRegion": "Nederland"
     },
     "geo": {
       "@type": "GeoCoordinates",
@@ -28,6 +30,14 @@ const Index = () => {
       "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
       "opens": "08:00",
       "closes": "18:00"
+    },
+    "sameAs": [
+      "https://www.instagram.com/cardetail.exclusief"
+    ],
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "5.0",
+      "reviewCount": "100"
     }
   };
 
