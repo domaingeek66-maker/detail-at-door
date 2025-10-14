@@ -14,7 +14,7 @@ export const SEO = ({
   title = "Cardetail Exclusief - Premium Car Detailing aan Huis",
   description = "Exclusieve car detailing service bij u aan huis. Professionele behandeling van uw auto met transparante prijzen en WhatsApp bevestiging.",
   keywords = "car detailing, auto detailing, car wash, ceramic coating, interieur reiniging, exterieur reiniging, mobiele car detailing, car detailing aan huis",
-  image = "https://lovable.dev/opengraph-image-p98pqg.png",
+  image = "/logo-email.png",
   url = "https://cardetail-exclusief.nl",
   type = "website",
   structuredData,
