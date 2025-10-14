@@ -5,6 +5,7 @@ import { BeforeAfterSection } from "@/components/BeforeAfterSection";
 import { PortfolioTestimonials } from "@/components/PortfolioTestimonials";
 import { Footer } from "@/components/Footer";
 import { SEO } from "@/components/SEO";
+import { CookieConsent } from "@/components/CookieConsent";
 
 const Index = () => {
   const structuredData = {
@@ -53,6 +54,7 @@ const Index = () => {
           <PortfolioTestimonials />
         </main>
         <Footer />
+        <CookieConsent />
       </div>
     </>
   );
