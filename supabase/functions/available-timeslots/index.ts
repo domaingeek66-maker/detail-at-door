@@ -136,10 +136,20 @@ Deno.serve(async (req) => {
     const dayStartMinutes = startHours * 60 + startMinutes;
     const dayEndMinutes = endHours * 60 + endMinutes;
 
+    // Check if the selected date is today
+    const now = new Date();
+    const isToday = localDate.getFullYear() === now.getFullYear() &&
+                    localDate.getMonth() === now.getMonth() &&
+                    localDate.getDate() === now.getDate();
+    
+    // Calculate minimum bookable time (current time + 1 hour buffer for today)
+    const currentMinutes = isToday ? (now.getHours() * 60 + now.getMinutes() + 60) : 0;
+    const effectiveStartMinutes = Math.max(dayStartMinutes, currentMinutes);
+
     const timeslots: TimeSlot[] = [];
     
     // Generate slots every 30 minutes
-    for (let minutes = dayStartMinutes; minutes <= dayEndMinutes - totalDurationMin; minutes += 30) {
+    for (let minutes = effectiveStartMinutes; minutes <= dayEndMinutes - totalDurationMin; minutes += 30) {
       const hours = Math.floor(minutes / 60);
       const mins = minutes % 60;
       const timeStr = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
