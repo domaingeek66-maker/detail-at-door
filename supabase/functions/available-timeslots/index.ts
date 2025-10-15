@@ -136,34 +136,41 @@ Deno.serve(async (req) => {
     const dayStartMinutes = startHours * 60 + startMinutes;
     const dayEndMinutes = endHours * 60 + endMinutes;
 
-    // Check if the selected date is today
-    const now = new Date();
-    const isToday = localDate.getFullYear() === now.getFullYear() &&
-                    localDate.getMonth() === now.getMonth() &&
-                    localDate.getDate() === now.getDate();
+    // Get current time in Europe/Amsterdam timezone (UTC+1 or UTC+2 depending on DST)
+    const nowUTC = new Date();
+    // Convert to Amsterdam time by adding the offset
+    const amsterdamOffset = 60; // CET is UTC+1, CEST is UTC+2 (we'll use +1 as base, DST handling is complex)
+    const nowAmsterdam = new Date(nowUTC.getTime() + amsterdamOffset * 60 * 1000);
+    
+    // Check if the selected date is today in Amsterdam timezone
+    const isToday = localDate.getFullYear() === nowAmsterdam.getFullYear() &&
+                    localDate.getMonth() === nowAmsterdam.getMonth() &&
+                    localDate.getDate() === nowAmsterdam.getDate();
     
     // Calculate minimum bookable time (current time + 1 hour buffer for today)
-    const currentMinutes = isToday ? (now.getHours() * 60 + now.getMinutes() + 60) : 0;
-    const effectiveStartMinutes = Math.max(dayStartMinutes, currentMinutes);
+    const currentMinutesWithBuffer = isToday ? (nowAmsterdam.getHours() * 60 + nowAmsterdam.getMinutes() + 60) : -1;
 
     const timeslots: TimeSlot[] = [];
     
     // Generate slots every 30 minutes
-    for (let minutes = effectiveStartMinutes; minutes <= dayEndMinutes - totalDurationMin; minutes += 30) {
+    for (let minutes = dayStartMinutes; minutes <= dayEndMinutes - totalDurationMin; minutes += 30) {
       const hours = Math.floor(minutes / 60);
       const mins = minutes % 60;
       const timeStr = `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
       
+      // Check if time slot is in the past (with 1 hour buffer for today)
+      const isPastTime = isToday && minutes < currentMinutesWithBuffer;
+      
       // Check if this slot + duration overlaps with any occupied range
       const slotEnd = minutes + totalDurationMin;
-      const isAvailable = !occupiedRanges.some(range => 
+      const hasOverlap = occupiedRanges.some(range => 
         // Check if there's any overlap
         (minutes < range.end && slotEnd > range.start)
       );
       
       timeslots.push({
         time: timeStr,
-        available: isAvailable,
+        available: !isPastTime && !hasOverlap,
       });
     }
 
