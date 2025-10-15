@@ -94,7 +94,7 @@ const Services = () => {
               {services?.map((service) => (
                 <Card 
                   key={service.id}
-                  className="overflow-hidden group hover:shadow-glow transition-smooth gradient-card border-border"
+                  className="overflow-hidden group hover:shadow-glow transition-smooth gradient-card border-border h-full flex flex-col"
                 >
                   <div className="relative h-64 overflow-hidden">
                     <img 
@@ -109,13 +109,13 @@ const Services = () => {
                     </div>
                   </div>
                   
-                  <CardHeader>
+                  <CardHeader className="flex-grow">
                     <CardDescription className="text-base">
                       {service.description}
                     </CardDescription>
                   </CardHeader>
                   
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-4 mt-auto">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Clock className="w-4 h-4" />

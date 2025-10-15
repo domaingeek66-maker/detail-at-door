@@ -56,7 +56,7 @@ export const ServicesSection = () => {
             {services?.map((service) => (
               <Card 
                 key={service.id}
-                className="overflow-hidden group hover:shadow-glow transition-smooth gradient-card border-border"
+                className="overflow-hidden group hover:shadow-glow transition-smooth gradient-card border-border h-full flex flex-col"
               >
                 <div className="relative h-48 overflow-hidden">
                   <img 
@@ -68,7 +68,7 @@ export const ServicesSection = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
                 </div>
                 
-                <CardHeader>
+                <CardHeader className="flex-grow">
                   <div className="flex items-start justify-between">
                     <CardTitle className="text-2xl">{service.name}</CardTitle>
                     <span className="text-2xl font-bold text-primary">
@@ -80,7 +80,7 @@ export const ServicesSection = () => {
                   </CardDescription>
                 </CardHeader>
                 
-                <CardContent>
+                <CardContent className="mt-auto">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">
                       Duur: {service.duration_min} minuten
