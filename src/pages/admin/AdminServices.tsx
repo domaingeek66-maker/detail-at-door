@@ -35,7 +35,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Plus, Pencil, Trash2, Clock, Euro } from "lucide-react";
+import { Plus, Pencil, Trash2, Clock, Euro, Upload, X } from "lucide-react";
 
 interface Service {
   id: string;
@@ -62,6 +62,8 @@ export default function AdminServices() {
     image_url: "",
     is_active: true,
   });
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -86,6 +88,46 @@ export default function AdminServices() {
 
     setServices(data || []);
     setLoading(false);
+  };
+
+  const handleImageUpload = async (file: File) => {
+    setUploadingImage(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const filePath = `service-images/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('service-images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('service-images')
+        .getPublicUrl(filePath);
+
+      setFormData({ ...formData, image_url: publicUrl });
+      setSelectedFile(file);
+      
+      toast({
+        title: "Afbeelding geüpload",
+        description: "De afbeelding is succesvol geüpload",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Upload fout",
+        description: error.message,
+      });
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setFormData({ ...formData, image_url: "" });
+    setSelectedFile(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -194,6 +236,7 @@ export default function AdminServices() {
       is_active: true,
     });
     setSelectedService(null);
+    setSelectedFile(null);
   };
 
   const openDeleteDialog = (service: Service) => {
@@ -292,14 +335,56 @@ export default function AdminServices() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="image_url">Afbeelding URL (optioneel)</Label>
-                <Input
-                  id="image_url"
-                  type="url"
-                  value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  placeholder="https://example.com/image.jpg"
-                />
+                <Label htmlFor="image_upload">Afbeelding</Label>
+                <div className="space-y-3">
+                  {formData.image_url ? (
+                    <div className="relative">
+                      <img 
+                        src={formData.image_url} 
+                        alt="Service preview" 
+                        className="w-full h-48 object-cover rounded-lg"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2"
+                        onClick={handleRemoveImage}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
+                      <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                      <Label htmlFor="image_upload" className="cursor-pointer">
+                        <span className="text-sm text-muted-foreground">
+                          Klik om een afbeelding te uploaden
+                        </span>
+                      </Label>
+                      <Input
+                        id="image_upload"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleImageUpload(file);
+                        }}
+                        disabled={uploadingImage}
+                      />
+                    </div>
+                  )}
+                  <Input
+                    type="url"
+                    value={formData.image_url}
+                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                    placeholder="Of plak een URL"
+                  />
+                  {uploadingImage && (
+                    <p className="text-xs text-muted-foreground">Bezig met uploaden...</p>
+                  )}
+                </div>
               </div>
               <div className="flex items-center space-x-2">
                 <Switch

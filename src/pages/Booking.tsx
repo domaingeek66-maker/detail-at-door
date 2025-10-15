@@ -502,7 +502,7 @@ const Booking = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {services?.map((service) => {
-                    const isSeatCleaning = service.name === "Stoelreiniging";
+                    const hasQuantitySelection = service.name === "Stoelreiniging" || service.name === "Leerbehandeling";
                     const isSelected = selectedServices.includes(service.id);
                     const quantity = serviceQuantities[service.id] || 1;
                     
@@ -524,14 +524,14 @@ const Booking = () => {
                             <p className="text-muted-foreground text-xs sm:text-sm">{service.description}</p>
                             <div className="flex items-center gap-4 mt-2">
                               <span className="text-primary font-bold text-sm sm:text-base">
-                                €{service.price},-{isSeatCleaning && " per stoel"}
+                                €{service.price},-{hasQuantitySelection && (service.name === "Stoelreiniging" ? " per stoel" : " per stoel")}
                               </span>
                               <span className="text-xs sm:text-sm text-muted-foreground">{service.duration_min} min</span>
                             </div>
                           </div>
                         </div>
                         
-                        {isSeatCleaning && isSelected && (
+                        {hasQuantitySelection && isSelected && (
                           <div className="mt-4 pt-4 border-t border-border flex items-center justify-between">
                             <Label className="text-sm font-medium">Aantal stoelen:</Label>
                             <div className="flex items-center gap-2">
