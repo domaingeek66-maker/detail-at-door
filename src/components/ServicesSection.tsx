@@ -57,7 +57,7 @@ export const ServicesSection = () => {
               >
                 <div className="relative h-48 overflow-hidden">
                   <img 
-                    src={serviceImages[service.name] || exteriorImage}
+                    src={service.image_url || serviceImages[service.name] || exteriorImage}
                     alt={`${service.name} - Cardetail Exclusief professionele behandeling`}
                     className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
                     loading="lazy"
