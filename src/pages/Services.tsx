@@ -95,7 +95,7 @@ const Services = () => {
                 >
                   <div className="relative h-64 overflow-hidden">
                     <img 
-                      src={serviceImages[service.name] || exteriorImage}
+                      src={service.image_url || serviceImages[service.name] || exteriorImage}
                       alt={`${service.name} - Professionele car detailing service aan huis`}
                       className="w-full h-full object-cover group-hover:scale-110 transition-smooth"
                       loading="lazy"
