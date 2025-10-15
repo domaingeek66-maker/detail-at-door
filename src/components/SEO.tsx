@@ -14,7 +14,7 @@ export const SEO = ({
   title = "Car Detailing aan Huis | Cardetail Exclusief | Professioneel & Mobiel",
   description = "Premium car detailing aan huis in heel Nederland. Interieur & exterieur reiniging, ceramic coating, poetsen. Boek online met transparante prijzen. ⭐ 100% tevredenheid.",
   keywords = "car detailing aan huis, mobiele car detailing, auto poetsen, interieur reiniging auto, exterieur reiniging, ceramic coating, auto wassen aan huis, car detailing nederland, professioneel auto detailing",
-  image = "https://cardetailexclusief.nl/banner.png",
+  image = "https://cardetailexclusief.nl/logo-email.png",
   url = "https://cardetailexclusief.nl",
   type = "website",
   structuredData,

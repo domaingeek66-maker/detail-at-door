@@ -16,7 +16,7 @@ const Index = () => {
     "url": "https://cardetailexclusief.nl",
     "telephone": "+31612345678",
     "priceRange": "€€",
-    "image": "https://cardetailexclusief.nl/banner.png",
+    "image": "https://cardetailexclusief.nl/logo-email.png",
     "address": {
       "@type": "PostalAddress",
       "addressCountry": "NL",
