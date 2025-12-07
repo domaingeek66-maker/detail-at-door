@@ -40,20 +40,20 @@ export const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">Contact</h3>
             <ul className="space-y-3 text-sm text-muted-foreground">
-              <li className="grid grid-cols-[16px,1fr] items-center gap-3">
-                <Phone className="w-4 h-4 text-primary" aria-hidden="true" />
-                <a href="tel:+31621116963" className="hover:text-primary transition-smooth whitespace-nowrap">+31621116963</a>
+              <li className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true" />
+                <a href="tel:+31621116963" className="hover:text-primary transition-smooth">+31 6 21116963</a>
               </li>
-              <li className="grid grid-cols-[16px,1fr] items-center gap-3">
-                <Mail className="w-4 h-4 text-primary" aria-hidden="true" />
-                <a href="mailto:cardetail.exclusief@gmail.com" className="hover:text-primary transition-smooth break-all md:break-normal md:whitespace-nowrap">cardetail.exclusief@gmail.com</a>
+              <li className="flex items-start gap-2">
+                <Mail className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" aria-hidden="true" />
+                <a href="mailto:cardetail.exclusief@gmail.com" className="hover:text-primary transition-smooth break-all">cardetail.exclusief@gmail.com</a>
               </li>
-              <li className="grid grid-cols-[16px,1fr] items-center gap-3">
-                <MapPin className="w-4 h-4 text-primary" aria-hidden="true" />
+              <li className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true" />
                 <span>Landelijk actief</span>
               </li>
-              <li className="grid grid-cols-[16px,1fr] items-center gap-3 mt-2">
-                <Instagram className="w-4 h-4 text-primary" aria-hidden="true" />
+              <li className="flex items-center gap-2 pt-1">
+                <Instagram className="w-4 h-4 text-primary flex-shrink-0" aria-hidden="true" />
                 <a 
                   href="https://www.instagram.com/cardetail.exclusief/" 
                   target="_blank" 
