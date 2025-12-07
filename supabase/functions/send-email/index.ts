@@ -188,7 +188,7 @@ serve(async (req) => {
 <body>
   <div class="container">
     <div class="header">
-      <img src="https://i.postimg.cc/1zyMk2Gg/Cardetail.png" alt="Cardetail.Exclusief Logo">
+      <img src="https://cardetailexclusief.nl/logo-email.png" alt="Cardetail.Exclusief Logo">
       <h1>Bevestiging van je boeking</h1>
     </div>
     <div class="content">
@@ -409,7 +409,7 @@ serve(async (req) => {
 <body>
   <div class="container">
     <div class="header">
-      <img src="https://i.postimg.cc/1zyMk2Gg/Cardetail.png" alt="Cardetail.Exclusief Logo">
+      <img src="https://cardetailexclusief.nl/logo-email.png" alt="Cardetail.Exclusief Logo">
       <h1>🎉 Nieuwe Boeking!</h1>
     </div>
     <div class="content">
