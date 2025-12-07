@@ -49,9 +49,10 @@ serve(async (req) => {
 
       const servicesList = services.map(s => `<li style="margin: 4px 0;">${s}</li>`).join('');
       
-      // Calculate price breakdown (assuming totalPrice includes 21% BTW)
-      const subtotal = totalPrice / 1.21;
-      const btw = totalPrice - subtotal;
+      // Calculate price breakdown (totalPrice is EXCLUSIVE of BTW)
+      const subtotal = totalPrice;
+      const btw = totalPrice * 0.21;
+      const totalWithBtw = totalPrice + btw;
 
       const html = `
 <!DOCTYPE html>
@@ -234,7 +235,7 @@ serve(async (req) => {
           <div class="info-row" style="margin-top: 8px; padding-top: 12px; border-top: 1px solid rgba(0, 191, 255, 0.15);">
             <span class="info-icon"></span>
             <span class="info-label">Totaal (incl. BTW):</span>
-            <span class="info-value" style="font-size: 18px; font-weight: 700; color: #00bfff;">€${totalPrice.toFixed(2)}</span>
+            <span class="info-value" style="font-size: 18px; font-weight: 700; color: #00bfff;">€${totalWithBtw.toFixed(2)}</span>
           </div>
         </div>
       </div>
@@ -468,7 +469,7 @@ serve(async (req) => {
           <div class="info-row" style="margin-top: 8px; padding-top: 12px; border-top: 1px solid rgba(0, 191, 255, 0.15);">
             <span class="info-icon"></span>
             <span class="info-label">Totaal (incl. BTW):</span>
-            <span class="info-value" style="font-size: 18px; font-weight: 700; color: #00bfff;">€${totalPrice.toFixed(2)}</span>
+            <span class="info-value" style="font-size: 18px; font-weight: 700; color: #00bfff;">€${totalWithBtw.toFixed(2)}</span>
           </div>
         </div>
       </div>
