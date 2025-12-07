@@ -52,7 +52,7 @@ export const Footer = () => {
                 <MapPin className="w-4 h-4 text-primary" aria-hidden="true" />
                 <span>Landelijk actief</span>
               </li>
-              <li className="grid grid-cols-[16px,1fr] items-center gap-3">
+              <li className="grid grid-cols-[16px,1fr] items-center gap-3 mt-2">
                 <Instagram className="w-4 h-4 text-primary" aria-hidden="true" />
                 <a 
                   href="https://www.instagram.com/cardetail.exclusief/" 
